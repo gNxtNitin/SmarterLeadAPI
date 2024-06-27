@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using SmarterLead.API.DataServices;
 using SmarterLead.API.Models.RequestModel;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -13,14 +14,17 @@ namespace SmarterLead.API.Controllers
     public class AdminController : ControllerBase
     {
         private IConfiguration _config;
-        public AdminController(IConfiguration config)
+        private readonly ApplicationDbContext _context;
+        public AdminController(IConfiguration config, ApplicationDbContext context)
         {
             _config = config;
+            _context = context;
         }
         [HttpPost("AuthenticateUser")]
-        public IActionResult Login([FromBody] UserLogin model)
+        public async Task<IActionResult> Login([FromBody] UserLoginRequest model)
         {
-            if (model.Username == "test" && model.Password == "password")
+            var userDetails = await _context.ValidateUser(model);
+            if (userDetails !=null)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_config.GetValue<string>("jwt:key"));
@@ -28,23 +32,28 @@ namespace SmarterLead.API.Controllers
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
-                    new Claim(ClaimTypes.Name, model.Username)
+                        new Claim(ClaimTypes.Name, model.Username)
                     }),
                     Expires = DateTime.UtcNow.AddHours(2),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 var tokenString = tokenHandler.WriteToken(token);
-
-                return Ok(new { Token = tokenString });
+                userDetails.Token = tokenString;
+                return Ok(userDetails);
             }
             return Unauthorized();
         }
         [Authorize]
         [HttpGet("GetUserById")]
-        public IActionResult GetUserById( int userId)
+        public async Task<IActionResult> GetUserById( int userId)
         {
-            return Ok("1");
+            var userDetails = await _context.GetUserById(userId);
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
         }
     }
 }

@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using SmarterLead.API.DataServices;
 using System.Text;
-// Add services to the container.
-
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 // Add services to the container.
-
+var connStr = builder.Configuration.GetConnectionString("connStr");
 builder.Services.AddControllers();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql(connStr,ServerVersion.AutoDetect(connStr)).EnableDetailedErrors()); // Adjust the version as necessary
 
 var key = Encoding.ASCII.GetBytes(builder.Configuration.GetValue<string>("jwt:key"));
 builder.Services.AddAuthentication(options =>
