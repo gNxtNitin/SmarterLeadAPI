@@ -182,7 +182,22 @@ namespace SmarterLead.API.DataServices
                     try
                     {
                         var parameters = new DynamicParameters();
-//                        parameters.Add("_clientLoginID", clientLoginId, DbType.String);
+                        parameters.Add("_state", r.State, DbType.String);
+                        parameters.Add("_entitytype", r.EntityType, DbType.String);
+                        parameters.Add("_cargo", r.Cargo, DbType.String);
+                        parameters.Add("_class", r.Classifications, DbType.String);
+                        parameters.Add("_carcarried", r.CargoCarried, DbType.String);
+                        parameters.Add("_powerunitst", r.PowerUnitSt, DbType.Int32);
+                        parameters.Add("_powerunitend", r.PowerUnitEnd, DbType.Int32);
+                        parameters.Add("_driverst", r.DriverSt, DbType.Int32);
+                        parameters.Add("_driverend", r.DriverEnd, DbType.Int32);
+                        parameters.Add("_driveinsst", r.DriveInsSt, DbType.Int32);
+                        parameters.Add("_driveinsend", r.DriveInsEnd, DbType.Int32);
+                        parameters.Add("_hazmatst", r.HazmatSt, DbType.Int32);
+                        parameters.Add("_hazmatend", r.HazmatEnd, DbType.Int32);
+                        parameters.Add("_oosst", r.OOsSt, DbType.Int32);
+                        parameters.Add("_oostend", r.OOsEnd, DbType.Int32);
+
                         var response = await connection.QueryAsync(
                             "pGetSearchedLeads",
                             parameters,
@@ -196,6 +211,65 @@ namespace SmarterLead.API.DataServices
                         //{
                         //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
                         //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<string> GetDwldLeadSummary(int clientLoginId, int summaryId)
+        {
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientLoginId", clientLoginId, DbType.String);
+                        parameters.Add("_summaryId", summaryId, DbType.String);
+                        var response = await connection.QueryAsync(
+                            "GetDwldLeadSummary",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<string> GetDwldLeadDetails(int _clientDwdLeadSummaryID)
+        {
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientDwdLeadSummaryID", _clientDwdLeadSummaryID, DbType.String);
+                        var response = await connection.QueryAsync(
+                            "pGetClientdwdLeadDetail",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
                     }
                     catch (Exception ex)
                     {

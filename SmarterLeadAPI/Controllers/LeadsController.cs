@@ -44,10 +44,32 @@ namespace SmarterLead.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetSearchLeads(SearchLeadRequest r)
         {
-            var userDetails = await _context.GetSearchLeadStats(r);
-            if (userDetails != null)
+            var leadsCount = await _context.GetSearchLeadStats(r);
+            if (leadsCount != null)
             {
-                return Ok(userDetails);
+                return Ok(leadsCount);
+            }
+            return Unauthorized();
+        }
+        [HttpGet("GetDwldLeadSummary")]
+        [Authorize]
+        public async Task<IActionResult> GetDwldLeadSummary(int clientLoginId,int summaryId = 0)
+        {
+            var result = await _context.GetDwldLeadSummary(clientLoginId,summaryId);
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return Unauthorized();
+        }
+        [HttpGet("GetDwldLeadDetails")]
+        [Authorize]
+        public async Task<IActionResult> GetClientDwldLeadDetail(int ClientDwdLeadSummaryID)
+        {
+            var result = await _context.GetDwldLeadDetails(ClientDwdLeadSummaryID);
+            if (result != null)
+            {
+                return Ok(result);
             }
             return Unauthorized();
         }
