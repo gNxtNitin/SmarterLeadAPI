@@ -73,5 +73,49 @@ namespace SmarterLead.API.Controllers
             }
             return Unauthorized();
         }
+
+        [HttpGet("GetPurchaseHistory")]
+        //[Authorize]
+        //public async Task<ActionResult<IEnumerable<PlanHistory>>> GetPurchaseHistory(int ClientID)
+        public async Task<IActionResult> GetPurchaseHistory(int ClientID)
+        {
+            //var userDetails = await _context.clientplan.Where(c => c.PlanID == clientLoginId).ToListAsync();
+            var userDetails = await _context.GetPurchaseHistory(ClientID);
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+
+
+        }
+        [HttpGet("GetInvoice")]
+        //[Authorize]
+        public async Task<IActionResult> GetInvoice(int ClientPlanID)
+        {
+            //var userDetails = await _context.clientplan.FindAsync(id);
+            var userDetails = await _context.GetInvoice(ClientPlanID);
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+
+
+        }
+        [HttpGet("GetPlans")]
+        [Authorize]
+        public async Task<IActionResult> GetPlans(int id)
+        {
+            //var userDetails = await _context.clientplan.FindAsync(id);
+            var userDetails = await _context.GetPlans();
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+
+
+        }
     }
 }

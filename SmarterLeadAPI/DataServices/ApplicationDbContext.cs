@@ -283,5 +283,127 @@ namespace SmarterLead.API.DataServices
             }
             return resp;
         }
+
+        public async Task<string> GetPurchaseHistory(int ClientID)
+        {
+            string resp = "";
+            DataTable dt = new DataTable();
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("ClientID", ClientID);
+                        var response = await connection.QueryAsync(
+                            "pGetPaymentHistory",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        //return response;
+                        //resp = response;
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (resp == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+
+        public async Task<IEnumerable<dynamic>> GetInvoice(int ClientPlanID)
+        {
+            IEnumerable<dynamic> resp = [];
+            DataTable dt = new DataTable();
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_ClientPlanID", ClientPlanID);
+                        var response = await connection.QueryAsync(
+                            "pGetInvoice",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        //return response;
+                        resp = response;
+                        //resp = JsonConvert.SerializeObject(response);
+                        //if (resp == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<IEnumerable<dynamic>> GetPlans()
+        {
+            IEnumerable<dynamic> resp = [];
+            DataTable dt = new DataTable();
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        //var parameters = new DynamicParameters();
+                        //parameters.Add("_ClientPlanID", ClientPlanID);
+                        var response = await connection.QueryAsync(
+                            "pGetPlans",
+                            
+                            commandType: CommandType.StoredProcedure);
+                        //return response;
+                        resp = response;
+                        //resp = JsonConvert.SerializeObject(response);
+                        //if (resp == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
     }
 }
