@@ -75,8 +75,7 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpGet("GetPurchaseHistory")]
-        //[Authorize]
-        //public async Task<ActionResult<IEnumerable<PlanHistory>>> GetPurchaseHistory(int ClientID)
+        [Authorize]
         public async Task<IActionResult> GetPurchaseHistory(int ClientID)
         {
             //var userDetails = await _context.clientplan.Where(c => c.PlanID == clientLoginId).ToListAsync();
@@ -90,7 +89,7 @@ namespace SmarterLead.API.Controllers
 
         }
         [HttpGet("GetInvoice")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetInvoice(int ClientPlanID)
         {
             //var userDetails = await _context.clientplan.FindAsync(id);
@@ -103,6 +102,22 @@ namespace SmarterLead.API.Controllers
 
 
         }
+
+        [HttpGet("GetCurrentPlan")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentPlan(int clientLoginId)
+        {
+            //var userDetails = await _context.clientplan.FindAsync(id);
+            var userDetails = await _context.GetCurrentPlan(clientLoginId);
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+
+
+        }
+
         [HttpGet("GetPlans")]
         [Authorize]
         public async Task<IActionResult> GetPlans(int id)
