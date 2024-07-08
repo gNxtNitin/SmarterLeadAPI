@@ -14,6 +14,8 @@ namespace SmarterLead.API.Models.RequestModel
         public string? PowerUnitEnd {get;set;}
         public string? DriverSt {get;set;}
         public string? DriverEnd {get;set;}
+        public string? VehicleInsSt {get;set;}
+        public string? VehicleInsEnd {get;set;}
         public string? DriveInsSt {get;set;}
         public string? DriveInsEnd {get;set;}
         public string? HazmatSt {get;set;}

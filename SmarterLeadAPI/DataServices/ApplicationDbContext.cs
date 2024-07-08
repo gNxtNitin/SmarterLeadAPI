@@ -182,21 +182,23 @@ namespace SmarterLead.API.DataServices
                     try
                     {
                         var parameters = new DynamicParameters();
-                        parameters.Add("_state", r.State, DbType.String);
-                        parameters.Add("_entitytype", r.EntityType, DbType.String);
-                        parameters.Add("_cargo", r.Cargo, DbType.String);
-                        parameters.Add("_class", r.Classifications, DbType.String);
+                        parameters.Add("_stateCode", r.State, DbType.String);
+                        parameters.Add("_entityType", r.EntityType, DbType.String);
+                        parameters.Add("_cargoCarriedName", r.Cargo, DbType.String);
+                        parameters.Add("_operatingStatus", r.Classifications, DbType.String);
                         parameters.Add("_carcarried", r.CargoCarried, DbType.String);
-                        parameters.Add("_powerunitst", r.PowerUnitSt, DbType.Int32);
-                        parameters.Add("_powerunitend", r.PowerUnitEnd, DbType.Int32);
-                        parameters.Add("_driverst", r.DriverSt, DbType.Int32);
-                        parameters.Add("_driverend", r.DriverEnd, DbType.Int32);
-                        parameters.Add("_driveinsst", r.DriveInsSt, DbType.Int32);
-                        parameters.Add("_driveinsend", r.DriveInsEnd, DbType.Int32);
-                        parameters.Add("_hazmatst", r.HazmatSt, DbType.Int32);
-                        parameters.Add("_hazmatend", r.HazmatEnd, DbType.Int32);
-                        parameters.Add("_oosst", r.OOsSt, DbType.Int32);
-                        parameters.Add("_oostend", r.OOsEnd, DbType.Int32);
+                        parameters.Add("_fromPU", r.PowerUnitSt, DbType.Int32);
+                        parameters.Add("_toPU", r.PowerUnitEnd, DbType.Int32);
+                        parameters.Add("_fromTD", r.DriverSt, DbType.Int32);
+                        parameters.Add("_toTD", r.DriverEnd, DbType.Int32);
+                        parameters.Add("_fromVI", r.VehicleInsSt, DbType.Int32);
+                        parameters.Add("_toVI", r.VehicleInsEnd, DbType.Int32);
+                        parameters.Add("_fromDI", r.DriveInsSt, DbType.Int32);
+                        parameters.Add("_toDI", r.DriveInsEnd, DbType.Int32);
+                        parameters.Add("_fromHI", r.HazmatSt, DbType.Int32);
+                        parameters.Add("_toHI", r.HazmatEnd, DbType.Int32);
+                        parameters.Add("_fromOV", r.OOsSt, DbType.Int32);
+                        parameters.Add("_toOV", r.OOsEnd, DbType.Int32);
 
                         var response = await connection.QueryAsync(
                             "pGetSearchedLeads",
@@ -366,9 +368,9 @@ namespace SmarterLead.API.DataServices
             return resp;
         }
 
-        public async Task<IEnumerable<dynamic>> GetInvoice(int ClientPlanID)
+        public async Task<string> GetInvoice(int ClientPlanID)
         {
-            IEnumerable<dynamic> resp = [];
+            string resp = "";
             DataTable dt = new DataTable();
             try
             {
@@ -383,8 +385,8 @@ namespace SmarterLead.API.DataServices
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         //return response;
-                        resp = response;
-                        //resp = JsonConvert.SerializeObject(response);
+                        //resp = response;
+                        resp = JsonConvert.SerializeObject(response);
                         //if (resp == null)
                         //{
                         //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
@@ -406,9 +408,9 @@ namespace SmarterLead.API.DataServices
             }
             return resp;
         }
-        public async Task<IEnumerable<dynamic>> GetPlans()
+        public async Task<string> GetPlans()
         {
-            IEnumerable<dynamic> resp = [];
+            string resp = "";
             DataTable dt = new DataTable();
             try
             {
@@ -423,8 +425,8 @@ namespace SmarterLead.API.DataServices
                             
                             commandType: CommandType.StoredProcedure);
                         //return response;
-                        resp = response;
-                        //resp = JsonConvert.SerializeObject(response);
+                        //resp = response;
+                        resp = JsonConvert.SerializeObject(response);
                         //if (resp == null)
                         //{
                         //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);

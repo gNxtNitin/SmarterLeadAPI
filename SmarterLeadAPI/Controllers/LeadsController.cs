@@ -41,9 +41,10 @@ namespace SmarterLead.API.Controllers
             return Unauthorized();
         }
         [HttpPost("GetSearchLeads")]
-        [Authorize]
-        public async Task<IActionResult> GetSearchLeads(SearchLeadRequest r)
+        //[Authorize]
+        public async Task<IActionResult> GetSearchLeads([FromBody][FromQuery] SearchLeadRequest r)
         {
+            
             var leadsCount = await _context.GetSearchLeadStats(r);
             if (leadsCount != null)
             {
@@ -89,7 +90,7 @@ namespace SmarterLead.API.Controllers
 
         }
         [HttpGet("GetInvoice")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetInvoice(int ClientPlanID)
         {
             //var userDetails = await _context.clientplan.FindAsync(id);
