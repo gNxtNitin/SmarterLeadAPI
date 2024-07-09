@@ -5,6 +5,7 @@ namespace SmarterLead.API.Models.RequestModel
 {
     public class SearchLeadRequest
     {
+        public int? ClientLoginID { get; set; }
         public string? State {get;set;}
         public string? EntityType {get;set;}
         public string? Cargo {get;set;}

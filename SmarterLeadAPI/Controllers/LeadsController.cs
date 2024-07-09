@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmarterLead.API.DataServices;
 using SmarterLead.API.Models.RequestModel;
 using SmarterLead.API.Models.ResponseModel;
+using System.Text.Json;
 
 namespace SmarterLead.API.Controllers
 {
@@ -13,10 +14,12 @@ namespace SmarterLead.API.Controllers
     {
         private IConfiguration _config;
         private readonly ApplicationDbContext _context;
+        private readonly JsonSerializerOptions _serializerOptions;
         public LeadsController(IConfiguration config, ApplicationDbContext context)
         {
             _config = config;
             _context = context;
+            _serializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
         [HttpGet("GetDashboardHeaderDetails")]
         [Authorize]
@@ -42,10 +45,11 @@ namespace SmarterLead.API.Controllers
         }
         [HttpPost("GetSearchLeads")]
         //[Authorize]
-        public async Task<IActionResult> GetSearchLeads([FromBody][FromQuery] SearchLeadRequest r)
+        public async Task<IActionResult> GetSearchLeads([FromBody] SearchLeadRequest r)
         {
             
             var leadsCount = await _context.GetSearchLeadStats(r);
+            
             if (leadsCount != null)
             {
                 return Ok(leadsCount);

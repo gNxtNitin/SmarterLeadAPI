@@ -182,6 +182,7 @@ namespace SmarterLead.API.DataServices
                     try
                     {
                         var parameters = new DynamicParameters();
+                        parameters.Add("_clientID", r.ClientLoginID, DbType.Int32);
                         parameters.Add("_stateCode", r.State, DbType.String);
                         parameters.Add("_entityType", r.EntityType, DbType.String);
                         parameters.Add("_cargoCarriedName", r.Cargo, DbType.String);
