@@ -449,5 +449,46 @@ namespace SmarterLead.API.DataServices
             }
             return resp;
         }
+
+        public async Task<string> DownloadLeads(int clientID, int searchID, int dwdCount)
+        {
+            string resp = "";
+            DataTable dt = new DataTable();
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientID", clientID, DbType.Int32);
+                        parameters.Add("_searchID", searchID, DbType.Int32);
+                        parameters.Add("_dwdCount", dwdCount, DbType.Int32);
+                        var response = await connection.QueryAsync(
+                            "pDownloadLeads",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (resp == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
     }
 }
