@@ -58,6 +58,78 @@ namespace SmarterLead.API.DataServices
             }
             return userLogin;
         }
+        public async Task<string> ChangePassword(ChangePasswordRequest user)
+        {
+
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientLoginId", user.ClientLoginID, DbType.Int32);
+                        parameters.Add("_oldpwd", user.oldpwd, DbType.String);
+                        parameters.Add("_newpwd", user.newpwd, DbType.String);
+
+                        var response = await connection.ExecuteAsync(
+                            "pChangePassword",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+            
+        }
+        public async Task<string> UpdateProfile(UserProfile user)
+        {
+
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientLoginId", user.ClientLoginID, DbType.Int32);
+                        parameters.Add("_UserID", user.UserID, DbType.String);
+                        parameters.Add("_firstname", user.firstname, DbType.String);
+                        parameters.Add("_lastname", user.lastname, DbType.String);
+                        parameters.Add("_email", user.email, DbType.String);
+                        parameters.Add("_phone", user.phone, DbType.String);
+                        parameters.Add("_birthday", user.birthday, DbType.String);
+                        parameters.Add("_imagepath", user.imagepath, DbType.String);
+                        var response = await connection.ExecuteAsync(
+                            "pUpdateUserProfile",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+
+        }
         public async Task<User> GetUserById(int userId) 
         {
             var user = new User();
@@ -466,6 +538,44 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_dwdCount", dwdCount, DbType.Int32);
                         var response = await connection.QueryAsync(
                             "pDownloadLeads",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (resp == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<string> GetUserProfile(int clientLoginId)
+        {
+            string resp = "";
+            DataTable dt = new DataTable();
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientLoginID", clientLoginId, DbType.Int32);
+                        var response = await connection.QueryFirstOrDefaultAsync(
+                            "pGetUserProfile",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);

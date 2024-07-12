@@ -55,5 +55,62 @@ namespace SmarterLead.API.Controllers
             }
             return Unauthorized();
         }
+
+        [HttpPost("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            if (request == null || request.ClientLoginID== null || string.IsNullOrEmpty(request.newpwd) || string.IsNullOrEmpty(request.oldpwd))
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            // Call the stored procedure to update the password
+            var result = await _context.ChangePassword(request);
+            //return Ok(result);
+
+            if (result == "1")
+            {
+                return Ok("Password updated successfully.");
+            }
+            
+            return StatusCode(500, "An error occurred while updating the password.");
+            
+        }
+        [HttpPost("UpdateProfile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UserProfile request)
+        {
+            if (request == null || request.ClientLoginID == null || string.IsNullOrEmpty(request.UserID) || string.IsNullOrEmpty(request.firstname))
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            // Call the stored procedure to update the password
+            var result = await _context.UpdateProfile(request);
+            //return Ok(result);
+
+            if (result == "1")
+            {
+                return Ok("Profile updated successfully.");
+            }
+            
+            
+             return StatusCode(500, "An error occurred while updating the profile.");
+            
+        }
+
+        [HttpGet("GetUserProfile")]
+        //[Authorize]
+        public async Task<IActionResult> GetUserProfile(int clientLoginId)
+        {
+            //var userDetails = await _context.clientplan.FindAsync(id);
+            var userDetails = await _context.GetUserProfile(clientLoginId);
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+
+
+        }
     }
 }
