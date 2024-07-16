@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using SmarterLead.API.Models.RequestModel;
 using Stripe;
 using Stripe.Checkout;
 
 namespace SmarterLead.API.Controllers;
 
+[Route("api/[controller]")]
 [ApiController]
-[Route("/")]
 public class PaymentsController : Controller
 {
     private readonly IOptions<StripeOptions> options;
@@ -24,24 +25,26 @@ public class PaymentsController : Controller
         return new ConfigResponse
         {
             ProPrice = this.options.Value.ProPrice,
+            GoldPrice = this.options.Value.GoldPrice,
+            SilverPrice = this.options.Value.SilverPrice,
             BasicPrice = this.options.Value.BasicPrice,
             PublishableKey = this.options.Value.PublishableKey,
         };
     }
 
     [HttpPost("create-checkout-session")]
-    public async Task<IActionResult> CreateCheckoutSession()
+    public async Task<IActionResult> CreateCheckoutSession([FromBody] PriceTag sk)
     {
         var options = new SessionCreateOptions
         {
-            SuccessUrl = $"{this.options.Value.Domain}/success.html?session_id={{CHECKOUT_SESSION_ID}}",
-            CancelUrl = $"{this.options.Value.Domain}/canceled.html",
+            SuccessUrl = $"{this.options.Value.Domain}/Success/{{CHECKOUT_SESSION_ID}}",
+            CancelUrl = $"{this.options.Value.Domain}/Fail",
             Mode = "subscription",
             LineItems = new List<SessionLineItemOptions>
                 {
                     new SessionLineItemOptions
                     {
-                        Price = Request.Form["priceId"],
+                        Price = sk.pk.ToString(),
                         Quantity = 1,
                     },
                 },
@@ -51,7 +54,7 @@ public class PaymentsController : Controller
         try
         {
             var session = await service.CreateAsync(options);
-            return Redirect(session.Url);
+            return Json(session);
         }
         catch (StripeException e)
         {

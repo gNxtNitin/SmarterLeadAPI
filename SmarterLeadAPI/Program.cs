@@ -3,9 +3,32 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using SmarterLead.API.DataServices;
+using Stripe;
 using System.Text;
 
+DotNetEnv.Env.Load();
+
+StripeConfiguration.AppInfo = new AppInfo
+{
+    Name = "stripe-samples/checkout-single-subscription",
+    Url = "https://github.com/stripe-samples/checkout-single-subscription",
+    Version = "0.0.1",
+};
+
 var builder = WebApplication.CreateBuilder(args);
+// Services for payment
+builder.Services.Configure<StripeOptions>(options =>
+{
+    options.PublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
+    options.SecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+    options.WebhookSecret = Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET");
+    options.BasicPrice = Environment.GetEnvironmentVariable("BASIC_PRICE_ID");
+    options.SilverPrice = Environment.GetEnvironmentVariable("SILVER_PRICE_ID");
+    options.GoldPrice = Environment.GetEnvironmentVariable("Gold_PRICE_ID");
+    options.ProPrice = Environment.GetEnvironmentVariable("PRO_PRICE_ID");
+    options.Domain = Environment.GetEnvironmentVariable("DOMAIN");
+});
+
 // Add services to the container.
 var connStr = builder.Configuration.GetConnectionString("connStr");
 builder.Services.AddControllers();
