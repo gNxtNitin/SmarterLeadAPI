@@ -312,7 +312,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_clientLoginId", clientLoginId, DbType.String);
                         parameters.Add("_summaryId", summaryId, DbType.String);
                         var response = await connection.QueryAsync(
-                            "GetDwldLeadSummary",
+                            "pGetDwldLeadSummary",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
