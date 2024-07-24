@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using SmarterLead.API.DataServices;
+using SmarterLead.API.Models;
+
 using Stripe;
 using System.Text;
 
@@ -16,6 +18,9 @@ StripeConfiguration.AppInfo = new AppInfo
 };
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
 // Services for payment
 builder.Services.Configure<StripeOptions>(options =>
 {
@@ -60,6 +65,8 @@ builder.Services.AddSwaggerGen();
 builder.Host.UseSerilog();
 
 var app = builder.Build();
+
+
 
 Log.Logger = new LoggerConfiguration().
                WriteTo.File($"{ app.Configuration.GetValue<string>("LogPath")}//log.txt", rollingInterval: RollingInterval.Day)

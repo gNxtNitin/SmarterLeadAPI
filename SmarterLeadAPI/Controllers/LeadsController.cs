@@ -56,6 +56,32 @@ namespace SmarterLead.API.Controllers
             }
             return Unauthorized();
         }
+
+        [HttpPost("DownloadLeads")]
+        //[Authorize]
+        public async Task<IActionResult> DownloadLeads([FromBody] DownloadLeadsRequest r)
+        {
+
+            var leadsCount = await _context.DownloadLeads(r);
+
+            if (leadsCount != null)
+            {
+                return Ok(leadsCount);
+            }
+            return Unauthorized();
+        }
+        [HttpGet("GetData")]
+        //[Authorize]
+        public async Task<IActionResult> GetData()
+        {
+            var result = await _context.GetData();
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return Unauthorized();
+        }
+
         [HttpGet("GetDwldLeadSummary")]
         [Authorize]
         public async Task<IActionResult> GetDwldLeadSummary(int clientLoginId,int summaryId = 0)
@@ -80,7 +106,7 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpGet("GetPurchaseHistory")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetPurchaseHistory(int ClientID)
         {
             //var userDetails = await _context.clientplan.Where(c => c.PlanID == clientLoginId).ToListAsync();

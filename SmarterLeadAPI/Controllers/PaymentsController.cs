@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using SmarterLead.API.DataServices;
 using SmarterLead.API.Models.RequestModel;
 using Stripe;
 using Stripe.Checkout;
@@ -12,10 +13,12 @@ public class PaymentsController : Controller
 {
     private readonly IOptions<StripeOptions> options;
     private readonly IStripeClient client;
+    private readonly ApplicationDbContext _context;
 
-    public PaymentsController(IOptions<StripeOptions> options)
+    public PaymentsController(IOptions<StripeOptions> options, ApplicationDbContext context)
     {
         this.options = options;
+        _context = context;
         this.client = new StripeClient(this.options.Value.SecretKey);
     }
 
@@ -128,6 +131,19 @@ public class PaymentsController : Controller
         }
 
         return Ok();
+    }
+    [HttpPost("SaveData")]
+    //[Authorize]
+    public async Task<IActionResult> SaveData([FromBody] PaymentDataRequest r)
+    {
+
+        var leadsCount = await _context.PaymentDataUpdate(r);
+
+        if (leadsCount != "")
+        {
+            return Ok(leadsCount);
+        }
+        return Unauthorized();
     }
 }
 

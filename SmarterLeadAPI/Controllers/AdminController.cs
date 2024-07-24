@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SmarterLead.API.DataServices;
+using SmarterLead.API.Models.ResponseModel;
 using SmarterLead.API.Models.RequestModel;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 
 namespace SmarterLead.API.Controllers
 {
@@ -13,12 +15,41 @@ namespace SmarterLead.API.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
+
         private IConfiguration _config;
         private readonly ApplicationDbContext _context;
+        
         public AdminController(IConfiguration config, ApplicationDbContext context)
         {
             _config = config;
             _context = context;
+            
+        }
+        private string GenerateRandomOTP()
+
+        {
+            string[] saAllowedCharacters = new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
+
+            string sOTP = String.Empty;
+
+            string sTempChars = String.Empty;
+
+            Random rand = new Random();
+
+            for (int i = 0; i < 6; i++)
+
+            {
+
+                int p = rand.Next(0, saAllowedCharacters.Length);
+
+                sTempChars = saAllowedCharacters[rand.Next(0, saAllowedCharacters.Length)];
+
+                sOTP += sTempChars;
+
+            }
+
+            return sOTP;
+
         }
         [HttpPost("AuthenticateUser")]
         public async Task<IActionResult> Login([FromBody] UserLoginRequest model)
@@ -79,7 +110,7 @@ namespace SmarterLead.API.Controllers
         [HttpPost("UpdateProfile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UserProfile request)
         {
-            if (request == null || request.ClientLoginID == null || string.IsNullOrEmpty(request.UserID) || string.IsNullOrEmpty(request.firstname))
+            if (request == null || request.ClientID == null || string.IsNullOrEmpty(request.UserID) || string.IsNullOrEmpty(request.firstname))
             {
                 return BadRequest("Invalid request.");
             }
@@ -112,5 +143,56 @@ namespace SmarterLead.API.Controllers
 
 
         }
+        [HttpPost("Signup")]
+        public async Task<IActionResult> SignUp([FromBody] SignUpRequest model)
+        {
+            var userDetails = await _context.SignUp(model);
+            if (userDetails != null)
+            {
+               
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+        }
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest fpr)
+        {
+            string otp = GenerateRandomOTP();
+            var userDetails = await _context.VerifyEmail(fpr, otp);
+            //var pp= userDetails.Count();
+            if (userDetails.Count() > 2)
+            {
+                return Ok(otp);
+                
+            }
+            return StatusCode(404, "An error occurred while finding email. Email Not Found!");
+        }
+        [HttpGet("VerifyOtp")]
+        public async Task<IActionResult> VerifyOtp(string otp, string email)
+        {
+            
+            var userDetails = await _context.VerifyOtp(otp, email);
+            if (userDetails.Count() > 2)
+            {
+                return Ok(userDetails);
+            }
+            return StatusCode(404, "An error occurred while finding email. Email Not Found!");
+
+
+        }
+        [HttpPost("CreatePassword")]
+        public async Task<IActionResult> CreatePassword(CreatePasswordRequest cpr)
+        {
+            
+            var userDetails = await _context.CreatePassword(cpr);
+            //var pp= userDetails.Count();
+            if (userDetails != "0")
+            {
+                return Ok(userDetails);
+
+            }
+            return StatusCode(404, "An error occurred while creating new Password.");
+        }
+
     }
 }
