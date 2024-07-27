@@ -150,8 +150,8 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpGet("GetPlans")]
-        [Authorize]
-        public async Task<IActionResult> GetPlans(int id)
+        //[Authorize]
+        public async Task<IActionResult> GetPlans()
         {
             //var userDetails = await _context.clientplan.FindAsync(id);
             var userDetails = await _context.GetPlans();

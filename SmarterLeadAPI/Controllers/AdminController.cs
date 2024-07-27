@@ -107,6 +107,20 @@ namespace SmarterLead.API.Controllers
             return StatusCode(500, "An error occurred while updating the password.");
             
         }
+        [HttpGet("GetAllUsers")]
+        //[Authorize]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            //var userDetails = await _context.clientplan.FindAsync(id);
+            var userDetails = await _context.GetAllUsers();
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+
+
+        }
         [HttpPost("UpdateProfile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UserProfile request)
         {
@@ -167,11 +181,11 @@ namespace SmarterLead.API.Controllers
             }
             return StatusCode(404, "An error occurred while finding email. Email Not Found!");
         }
-        [HttpGet("VerifyOtp")]
-        public async Task<IActionResult> VerifyOtp(string otp, string email)
+        [HttpPost("VerifyOtp")]
+        public async Task<IActionResult> VerifyOtp(VerifyOtpRequest vor)
         {
             
-            var userDetails = await _context.VerifyOtp(otp, email);
+            var userDetails = await _context.VerifyOtp(vor.otp, vor.email);
             if (userDetails.Count() > 2)
             {
                 return Ok(userDetails);

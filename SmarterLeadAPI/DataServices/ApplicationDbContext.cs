@@ -493,6 +493,36 @@ namespace SmarterLead.API.DataServices
             }
             return data;
         }
+        public async Task<dynamic> GetAllUsers()
+        {
+            //string resp = "";
+            dynamic resp = new {};
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+
+                        var response = await connection.QueryAsync(
+                            "pGetAllUsers",
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //data.Add(resp);
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
         public async Task<string> DownloadLeads(DownloadLeadsRequest r)
         {
             string resp = "";
@@ -595,7 +625,7 @@ namespace SmarterLead.API.DataServices
                     try
                     {
                         var parameters = new DynamicParameters();
-                        parameters.Add("ClientID", ClientID);
+                        parameters.Add("_ClientID", ClientID, DbType.Int32);
                         var response = await connection.QueryAsync(
                             "pGetPaymentHistory",
                             parameters,
