@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmarterLead.API.DataServices;
+using SmarterLead.API.Helper;
 using SmarterLead.API.Models.RequestModel;
 using SmarterLead.API.Models.ResponseModel;
 using System.Text.Json;
@@ -15,11 +16,13 @@ namespace SmarterLead.API.Controllers
         private IConfiguration _config;
         private readonly ApplicationDbContext _context;
         private readonly JsonSerializerOptions _serializerOptions;
+        public CPAService _service;
         public LeadsController(IConfiguration config, ApplicationDbContext context)
         {
             _config = config;
             _context = context;
             _serializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            _service = new CPAService(_config);
         }
         [HttpGet("GetDashboardHeaderDetails")]
         [Authorize]
@@ -95,9 +98,10 @@ namespace SmarterLead.API.Controllers
         }
         [HttpGet("GetDwldLeadDetails")]
         [Authorize]
-        public async Task<IActionResult> GetClientDwldLeadDetail(int ClientDwdLeadSummaryID)
+        public async Task<IActionResult> GetClientDwldLeadDetail(string ClientDwdLeadSummaryID)
         {
-            var result = await _context.GetDwldLeadDetails(ClientDwdLeadSummaryID);
+            var d = await _service.Decrypt(ClientDwdLeadSummaryID);
+            var result = await _context.GetDwldLeadDetails(int.Parse(d));
             if (result != null)
             {
                 return Ok(result);
@@ -121,10 +125,11 @@ namespace SmarterLead.API.Controllers
         }
         [HttpGet("GetInvoice")]
         //[Authorize]
-        public async Task<IActionResult> GetInvoice(int ClientPlanID)
+        public async Task<IActionResult> GetInvoice(string ID)
         {
             //var userDetails = await _context.clientplan.FindAsync(id);
-            var userDetails = await _context.GetInvoice(ClientPlanID);
+            var d = await _service.Decrypt(ID);
+            var userDetails = await _context.GetInvoice(int.Parse(d));
             if (userDetails != null)
             {
                 return Ok(userDetails);
