@@ -36,7 +36,7 @@ namespace SmarterLead.API.Controllers
             return Unauthorized();
         }
         [HttpGet("GetDashboardLeadStats")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetDashboardLeadStats(int clientLoginId)
         {
             var userDetails = await _context.GetDashBoardLeadStats(clientLoginId);
