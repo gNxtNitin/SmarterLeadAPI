@@ -86,7 +86,7 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpGet("GetDwldLeadSummary")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetDwldLeadSummary(int clientLoginId,int summaryId = 0)
         {
             var result = await _context.GetDwldLeadSummary(clientLoginId,summaryId);
