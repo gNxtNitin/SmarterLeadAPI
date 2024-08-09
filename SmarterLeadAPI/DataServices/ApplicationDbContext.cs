@@ -407,21 +407,21 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_clientID", r.ClientLoginID, DbType.Int32);
                         parameters.Add("_stateCode", r.State, DbType.String);
                         parameters.Add("_entityType", r.EntityType, DbType.String);
-                        parameters.Add("_cargoCarriedName", r.Cargo, DbType.String);
+                        parameters.Add("_cargoCarriedName", r.CargoCarried, DbType.String);
                         parameters.Add("_operatingStatus", r.Classifications, DbType.String);
                         parameters.Add("_carcarried", r.CargoCarried, DbType.String);
-                        parameters.Add("_fromPU", r.PowerUnitSt, DbType.Int32);
-                        parameters.Add("_toPU", r.PowerUnitEnd, DbType.Int32);
-                        parameters.Add("_fromTD", r.DriverSt, DbType.Int32);
-                        parameters.Add("_toTD", r.DriverEnd, DbType.Int32);
-                        parameters.Add("_fromVI", r.VehicleInsSt, DbType.Int32);
-                        parameters.Add("_toVI", r.VehicleInsEnd, DbType.Int32);
-                        parameters.Add("_fromDI", r.DriveInsSt, DbType.Int32);
-                        parameters.Add("_toDI", r.DriveInsEnd, DbType.Int32);
-                        parameters.Add("_fromHI", r.HazmatSt, DbType.Int32);
-                        parameters.Add("_toHI", r.HazmatEnd, DbType.Int32);
-                        parameters.Add("_fromOV", r.OOsSt, DbType.Int32);
-                        parameters.Add("_toOV", r.OOsEnd, DbType.Int32);
+                        parameters.Add("_fromPU", r.PowerUnitSt, DbType.String);
+                        parameters.Add("_toPU", r.PowerUnitEnd, DbType.String);
+                        parameters.Add("_fromTD", r.DriverSt, DbType.String);
+                        parameters.Add("_toTD", r.DriverEnd, DbType.String);
+                        parameters.Add("_fromVI", r.VehicleInsSt, DbType.String);
+                        parameters.Add("_toVI", r.VehicleInsEnd, DbType.String);
+                        parameters.Add("_fromDI", r.DriveInsSt, DbType.String);
+                        parameters.Add("_toDI", r.DriveInsEnd, DbType.String);
+                        parameters.Add("_fromHI", r.HazmatSt, DbType.String);
+                        parameters.Add("_toHI", r.HazmatEnd, DbType.String);
+                        parameters.Add("_fromOV", r.OOsSt, DbType.String);
+                        parameters.Add("_toOV", r.OOsEnd, DbType.String);
 
                         var response = await connection.QueryAsync(
                             "pGetSearchedLeads111",
@@ -464,22 +464,23 @@ namespace SmarterLead.API.DataServices
                             "pGetOperatingStatus",
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
-                        data.Add(resp);
+                        //data.Add(resp);
                         response = await connection.QueryAsync(
                             "pGetEntityType",
                             commandType: CommandType.StoredProcedure);
                         string resp1 = JsonConvert.SerializeObject(response);
-                        data.Add(resp1);
+                        //data.Add(resp1);
                         response = await connection.QueryAsync(
                             "pGetStateCode",
                             commandType: CommandType.StoredProcedure);
                         string resp2 = JsonConvert.SerializeObject(response);
-                        data.Add(resp2);
+                        //data.Add(resp2);
                         response = await connection.QueryAsync(
                             "pGetCargoCarried",
                             commandType: CommandType.StoredProcedure);
                         string resp3 = JsonConvert.SerializeObject(response);
-                        data.Add(resp3);
+                        //data.Add(resp3);
+                        data= [resp, resp1, resp2, resp3];
                     }
                     catch (Exception ex)
                     {
@@ -533,7 +534,7 @@ namespace SmarterLead.API.DataServices
                     try
                     {
                         var parameters = new DynamicParameters();
-                        parameters.Add("_clientLoginID", r.ClientLoginID, DbType.Int32);
+                        parameters.Add("_clientID", r.ClientLoginID, DbType.Int32);
                         parameters.Add("_dwdCount", r.Count, DbType.Int32);
                         parameters.Add("_searchID", r.SearchId, DbType.Int32);
                         var response = await connection.QueryAsync(

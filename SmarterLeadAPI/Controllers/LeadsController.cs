@@ -96,11 +96,11 @@ namespace SmarterLead.API.Controllers
             }
             return Unauthorized();
         }
-        [HttpGet("GetDwldLeadDetails")]
+        [HttpPost("GetDwldLeadDetails")]
         [Authorize]
-        public async Task<IActionResult> GetClientDwldLeadDetail(string ClientDwdLeadSummaryID)
+        public async Task<IActionResult> GetClientDwldLeadDetail([FromBody] EncryptIdRequest eir)
         {
-            var d = await _service.Decrypt(ClientDwdLeadSummaryID);
+            var d = await _service.Decrypt(eir.Id);
             var result = await _context.GetDwldLeadDetails(int.Parse(d));
             if (result != null)
             {
@@ -123,12 +123,11 @@ namespace SmarterLead.API.Controllers
 
 
         }
-        [HttpGet("GetInvoice")]
+        [HttpPost("GetInvoice")]
         //[Authorize]
-        public async Task<IActionResult> GetInvoice(string ID)
+        public async Task<IActionResult> GetInvoice([FromBody] EncryptIdRequest eir)
         {
-            //var userDetails = await _context.clientplan.FindAsync(id);
-            var d = await _service.Decrypt(ID);
+            var d = await _service.Decrypt(eir.Id);
             var userDetails = await _context.GetInvoice(int.Parse(d));
             if (userDetails != null)
             {
