@@ -1,9 +1,11 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
+//using MySql.Data.MySqlClient;
 using MySqlConnector;
 using Newtonsoft.Json;
 using SmarterLead.API.Models.RequestModel;
 using SmarterLead.API.Models.ResponseModel;
+using Stripe;
 using System.Data;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -394,6 +396,44 @@ namespace SmarterLead.API.DataServices
             }
             return resp;
         }
+        public async Task<string> GetDashBoardPie(int clientLoginId)
+        {
+            string resp = "";
+            DataTable dt = new DataTable();
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientLoginID", clientLoginId, DbType.Int32);
+                        var response = await connection.QueryAsync(
+                            "pGetPie",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (resp == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
         public async Task<string> GetSearchLeadStats(SearchLeadRequest r)
         {
             string resp = "";
@@ -449,38 +489,54 @@ namespace SmarterLead.API.DataServices
             }
             return resp;
         }
-        public async Task<List<dynamic>> GetData()
+        public async Task<List<List<dynamic>>> GetData()
         {
             string resp = "";
-            List<dynamic> data = new List<dynamic>();
+            List<List<dynamic>> data = new List<List<dynamic>>();
             try
             {
                 using (var connection = new MySqlConnection(Database.GetConnectionString()))
                 {
                     try
                     {
-                        
-                        var response = await connection.QueryAsync(
-                            "pGetOperatingStatus",
-                            commandType: CommandType.StoredProcedure);
-                        resp = JsonConvert.SerializeObject(response);
+
+                        using (var multi = await connection.QueryMultipleAsync("pGetData", commandType: CommandType.StoredProcedure))
+                        {
+                            var resultSet1 = multi.Read<dynamic>().ToList();
+                            //data.Add(resultSet1);
+
+                            var resultSet2 = multi.Read<dynamic>().ToList();
+                            //data.Add(resultSet2);
+
+                            var resultSet3 = multi.Read<dynamic>().ToList();
+                            //data.Add(resultSet3);
+
+                            var resultSet4 = multi.Read<dynamic>().ToList();
+                            data = [resultSet1, resultSet2, resultSet3, resultSet4];
+
+
+                        }
+                        //var response = await connection.QueryAsync(
+                        //    "pGetOperatingStatus",
+                        //    commandType: CommandType.StoredProcedure);
+                        //resp = JsonConvert.SerializeObject(response);
                         //data.Add(resp);
-                        response = await connection.QueryAsync(
-                            "pGetEntityType",
-                            commandType: CommandType.StoredProcedure);
-                        string resp1 = JsonConvert.SerializeObject(response);
-                        //data.Add(resp1);
-                        response = await connection.QueryAsync(
-                            "pGetStateCode",
-                            commandType: CommandType.StoredProcedure);
-                        string resp2 = JsonConvert.SerializeObject(response);
-                        //data.Add(resp2);
-                        response = await connection.QueryAsync(
-                            "pGetCargoCarried",
-                            commandType: CommandType.StoredProcedure);
-                        string resp3 = JsonConvert.SerializeObject(response);
-                        //data.Add(resp3);
-                        data= [resp, resp1, resp2, resp3];
+                        //response = await connection.QueryAsync(
+                        //    "pGetEntityType",
+                        //    commandType: CommandType.StoredProcedure);
+                        //string resp1 = JsonConvert.SerializeObject(response);
+                        ////data.Add(resp1);
+                        //response = await connection.QueryAsync(
+                        //    "pGetStateCode",
+                        //    commandType: CommandType.StoredProcedure);
+                        //string resp2 = JsonConvert.SerializeObject(response);
+                        ////data.Add(resp2);
+                        //response = await connection.QueryAsync(
+                        //    "pGetCargoCarried",
+                        //    commandType: CommandType.StoredProcedure);
+                        //string resp3 = JsonConvert.SerializeObject(response);
+                        ////data.Add(resp3);
+                        //data = [resp, resp1, resp2, resp3];
                     }
                     catch (Exception ex)
                     {
@@ -494,36 +550,36 @@ namespace SmarterLead.API.DataServices
             }
             return data;
         }
-        public async Task<dynamic> GetAllUsers()
-        {
-            //string resp = "";
-            dynamic resp = new {};
-            try
-            {
-                using (var connection = new MySqlConnection(Database.GetConnectionString()))
-                {
-                    try
-                    {
+        //public async Task<dynamic> GetAllUsers()
+        //{
+        //    //string resp = "";
+        //    dynamic resp = new {};
+        //    try
+        //    {
+        //        using (var connection = new MySqlConnection(Database.GetConnectionString()))
+        //        {
+        //            try
+        //            {
 
-                        var response = await connection.QueryAsync(
-                            "pGetAllUsers",
-                            commandType: CommandType.StoredProcedure);
-                        resp = JsonConvert.SerializeObject(response);
-                        //data.Add(resp);
+        //                var response = await connection.QueryAsync(
+        //                    "pGetAllUsers",
+        //                    commandType: CommandType.StoredProcedure);
+        //                resp = JsonConvert.SerializeObject(response);
+        //                //data.Add(resp);
                         
-                    }
-                    catch (Exception ex)
-                    {
-                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-            }
-            return resp;
-        }
+        //    }
+        //    return resp;
+        //}
         public async Task<string> DownloadLeads(DownloadLeadsRequest r)
         {
             string resp = "";

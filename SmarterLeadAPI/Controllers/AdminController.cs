@@ -107,20 +107,20 @@ namespace SmarterLead.API.Controllers
             return StatusCode(500, "An error occurred while updating the password.");
             
         }
-        [HttpGet("GetAllUsers")]
-        //[Authorize]
-        public async Task<IActionResult> GetAllUsers()
-        {
-            //var userDetails = await _context.clientplan.FindAsync(id);
-            var userDetails = await _context.GetAllUsers();
-            if (userDetails != null)
-            {
-                return Ok(userDetails);
-            }
-            return Unauthorized();
+        //[HttpGet("GetAllUsers")]
+       
+        //public async Task<IActionResult> GetAllUsers()
+        //{
+            
+        //    var userDetails = await _context.GetAllUsers();
+        //    if (userDetails != null)
+        //    {
+        //        return Ok(userDetails);
+        //    }
+        //    return Unauthorized();
 
 
-        }
+        //}
         [HttpPost("UpdateProfile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UserProfile request)
         {

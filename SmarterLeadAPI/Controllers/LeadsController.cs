@@ -46,8 +46,19 @@ namespace SmarterLead.API.Controllers
             }
             return Unauthorized();
         }
-        [HttpPost("GetSearchLeads")]
+        [HttpGet("GetDashboardPie")]
         //[Authorize]
+        public async Task<IActionResult> GetDashboardPie(int clientLoginId)
+        {
+            var userDetails = await _context.GetDashBoardPie(clientLoginId);
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+        }
+        [HttpPost("GetSearchLeads")]
+        [Authorize]
         public async Task<IActionResult> GetSearchLeads([FromBody] SearchLeadRequest r)
         {
             
@@ -61,7 +72,7 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpPost("DownloadLeads")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> DownloadLeads([FromBody] DownloadLeadsRequest r)
         {
 
@@ -74,7 +85,7 @@ namespace SmarterLead.API.Controllers
             return Unauthorized();
         }
         [HttpGet("GetData")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetData()
         {
             var result = await _context.GetData();
@@ -86,7 +97,7 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpGet("GetDwldLeadSummary")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetDwldLeadSummary(int clientLoginId,int summaryId = 0)
         {
             var result = await _context.GetDwldLeadSummary(clientLoginId,summaryId);
@@ -110,7 +121,7 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpGet("GetPurchaseHistory")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetPurchaseHistory(int ClientID)
         {
             //var userDetails = await _context.clientplan.Where(c => c.PlanID == clientLoginId).ToListAsync();
@@ -124,7 +135,7 @@ namespace SmarterLead.API.Controllers
 
         }
         [HttpPost("GetInvoice")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetInvoice([FromBody] EncryptIdRequest eir)
         {
             var d = await _service.Decrypt(eir.Id);
