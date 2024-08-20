@@ -133,6 +133,44 @@ namespace SmarterLead.API.DataServices
             return resp;
 
         }
+        public async Task<string> UploadImage(int clientLoginId)
+        {
+            string resp = "";
+            DataTable dt = new DataTable();
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientLoginId", clientLoginId, DbType.Int32);
+                        var response = await connection.ExecuteAsync(
+                            "pUploadImage",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (resp == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
         public async Task<string> SignUp(SignUpRequest user)
         {
 

@@ -207,6 +207,16 @@ namespace SmarterLead.API.Controllers
             }
             return StatusCode(404, "An error occurred while creating new Password.");
         }
+        [HttpGet("UploadImage")]
+        public async Task<IActionResult> UploadImage(int clientLoginId)
+        {
+            var userDetails = await _context.UploadImage(clientLoginId);
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+        }
 
     }
 }
