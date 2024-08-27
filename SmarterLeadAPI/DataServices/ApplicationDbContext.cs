@@ -503,6 +503,7 @@ namespace SmarterLead.API.DataServices
 
                         var response = await connection.QueryAsync(
                             "pGetSearchedLeads111",
+                            //"pNewTest1",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
@@ -633,6 +634,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_searchID", r.SearchId, DbType.Int32);
                         var response = await connection.QueryAsync(
                             "pDownloadLeads",
+                            //"pNewTest2",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
