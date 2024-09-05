@@ -31,7 +31,7 @@ namespace SmarterLead.API.DataServices
                     try
                     {
                         var parameters = new DynamicParameters();
-                        parameters.Add("_userId", user.Username, DbType.String);
+                        parameters.Add("_email", user.Email, DbType.String);
                         parameters.Add("_pwd", user.Password,DbType.String);
                         userLogin = await connection.QueryFirstOrDefaultAsync<UserLoginResponse>(
                             "pGetValidUser",
@@ -40,18 +40,18 @@ namespace SmarterLead.API.DataServices
 
                         if (userLogin == null)
                         {
-                            _logger.LogWarning("User with UserId: {UserId} not found", user.Username);
+                            _logger.LogWarning("User with UserId: {UserId} not found", user.Email);
                         }
                         else
                         {
-                            _logger.LogInformation("User with UserId: {UserId} found", user.Username);
+                            _logger.LogInformation("User with UserId: {UserId} found", user.Email);
                         }
 
                         return userLogin;
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.Username);
+                        _logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.Email);
                     }
                 }
             }
@@ -60,6 +60,124 @@ namespace SmarterLead.API.DataServices
                 
             }
             return userLogin;
+        }
+        public async Task<string> LoginOtp(UserLoginRequest user)
+        {
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_email", user.Email, DbType.String);
+                        parameters.Add("_password", user.Password, DbType.String);
+                        parameters.Add("_otp", user.otp, DbType.String);
+                        var response = await connection.QueryAsync(
+                            "pVerifyLoginforOtp",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (userLogin == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.Email);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.Email);
+                        //}
+
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.Email);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<string> ResendLoginOtp(VerifyOtpRequest user)
+        {
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_email", user.email, DbType.String);
+                        //parameters.Add("_password", user.Password, DbType.String);
+                        parameters.Add("_otp", user.otp, DbType.String);
+                        var response = await connection.QueryAsync(
+                            "pResendLoginOtp",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (userLogin == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.Email);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.Email);
+                        //}
+
+
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.email);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<UserLoginResponse> ValidateLoginOtp(string otp, string email)
+        {
+            var userLogin = new UserLoginResponse();
+            DataTable dt = new DataTable();
+            //string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+
+                        parameters.Add("_email", email, DbType.String);
+                        parameters.Add("_otp", otp, DbType.String);
+
+
+                        userLogin = await connection.QueryFirstOrDefaultAsync<UserLoginResponse>(
+                            "pValidateLoginOtp",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        //resp = JsonConvert.SerializeObject(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return userLogin;
+
         }
         public async Task<string> ChangePassword(ChangePasswordRequest user)
         {
@@ -107,13 +225,17 @@ namespace SmarterLead.API.DataServices
                     {
                         var parameters = new DynamicParameters();
                         parameters.Add("_clientID", user.ClientID, DbType.Int32);
-                        parameters.Add("_UserID", user.UserID, DbType.String);
+                        //parameters.Add("_UserID", user.UserID, DbType.String);
                         parameters.Add("_firstname", user.firstname, DbType.String);
                         parameters.Add("_lastname", user.lastname, DbType.String);
                         parameters.Add("_email", user.email, DbType.String);
                         parameters.Add("_phone", user.phone, DbType.String);
                         parameters.Add("_birthday", user.birthday, DbType.String);
-                        parameters.Add("_imagepath", user.imagepath, DbType.String);
+                        //parameters.Add("_imagepath", user.imagepath, DbType.String);
+                        parameters.Add("_company", user.CompanyName, DbType.String);
+                        parameters.Add("_zipcode", user.Zip, DbType.String);
+                        parameters.Add("_address", user.Address, DbType.String);
+                        parameters.Add("_city", user.City, DbType.String);
                         var response = await connection.ExecuteAsync(
                             "pUpdateUserProfile",
                             parameters,
@@ -182,19 +304,18 @@ namespace SmarterLead.API.DataServices
                     try
                     {
                         var parameters = new DynamicParameters();
-                        parameters.Add("_username", user.username, DbType.String);
+                       
                         parameters.Add("_email", user.email, DbType.String);
                         parameters.Add("_password", user.password, DbType.String);
-                        parameters.Add("_firstname", user.firstname, DbType.String);
-                        parameters.Add("_lastname", user.lastname, DbType.String);
+                        parameters.Add("_firstname", user.firstName, DbType.String);
+                        parameters.Add("_lastname", user.lastName, DbType.String);
                         parameters.Add("_phone", user.phone, DbType.String);
-                        parameters.Add("_imagepath", user.imagepath, DbType.String);
-                        parameters.Add("_birthday", user.birthday, DbType.String);
+                        parameters.Add("_company", user.company, DbType.String);
                         parameters.Add("_address", user.address, DbType.String);
                         parameters.Add("_city", user.city, DbType.String);
                         parameters.Add("_statecode", user.statecode, DbType.String);
                         parameters.Add("_zipcode", user.zipcode, DbType.String);
-                        
+                        parameters.Add("_otp", user.otp, DbType.String);
 
                         var response = await connection.ExecuteAsync(
                             "pSignup",
@@ -268,6 +389,41 @@ namespace SmarterLead.API.DataServices
 
                         var response = await connection.QueryAsync(
                             "pVerifyOtp",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+
+        }
+        public async Task<string> VerifySignUp(string otp, string email)
+        {
+
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+
+                        parameters.Add("_email", email, DbType.String);
+                        parameters.Add("_otp", otp, DbType.String);
+
+
+                        var response = await connection.QueryAsync(
+                            "pVerifySignUp",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
@@ -410,6 +566,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_clientLoginID", clientLoginId, DbType.String);
                         var response = await connection.QueryAsync(
                             "pGetDashboardLeadStats",
+                            //"potest",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
@@ -483,27 +640,29 @@ namespace SmarterLead.API.DataServices
                     {
                         var parameters = new DynamicParameters();
                         parameters.Add("_clientID", r.ClientLoginID, DbType.Int32);
+                        parameters.Add("_userLimit", r.UserLimit, DbType.Int32);
                         parameters.Add("_stateCode", r.State, DbType.String);
                         parameters.Add("_entityType", r.EntityType, DbType.String);
                         parameters.Add("_cargoCarriedName", r.CargoCarried, DbType.String);
                         parameters.Add("_operatingStatus", r.Classifications, DbType.String);
                         parameters.Add("_carcarried", r.CargoCarried, DbType.String);
-                        parameters.Add("_fromPU", r.PowerUnitSt, DbType.String);
-                        parameters.Add("_toPU", r.PowerUnitEnd, DbType.String);
-                        parameters.Add("_fromTD", r.DriverSt, DbType.String);
-                        parameters.Add("_toTD", r.DriverEnd, DbType.String);
-                        parameters.Add("_fromVI", r.VehicleInsSt, DbType.String);
-                        parameters.Add("_toVI", r.VehicleInsEnd, DbType.String);
-                        parameters.Add("_fromDI", r.DriveInsSt, DbType.String);
-                        parameters.Add("_toDI", r.DriveInsEnd, DbType.String);
-                        parameters.Add("_fromHI", r.HazmatSt, DbType.String);
-                        parameters.Add("_toHI", r.HazmatEnd, DbType.String);
-                        parameters.Add("_fromOV", r.OOsSt, DbType.String);
-                        parameters.Add("_toOV", r.OOsEnd, DbType.String);
+                        parameters.Add("_fromPU", r.PowerUnitSt, DbType.Int32);
+                        parameters.Add("_toPU", r.PowerUnitEnd, DbType.Int32);
+                        parameters.Add("_fromTD", r.DriverSt, DbType.Int32);
+                        parameters.Add("_toTD", r.DriverEnd, DbType.Int32);
+                        parameters.Add("_fromVI", r.VehicleInsSt, DbType.Int32);
+                        parameters.Add("_toVI", r.VehicleInsEnd, DbType.Int32);
+                        parameters.Add("_fromDI", r.DriveInsSt, DbType.Int32);
+                        parameters.Add("_toDI", r.DriveInsEnd, DbType.Int32);
+                        parameters.Add("_fromHI", r.HazmatSt, DbType.Int32);
+                        parameters.Add("_toHI", r.HazmatEnd, DbType.Int32);
+                        parameters.Add("_fromOV", r.OOsSt, DbType.Int32);
+                        parameters.Add("_toOV", r.OOsEnd, DbType.Int32);
 
                         var response = await connection.QueryAsync(
-                            "pGetSearchedLeads111",
+                            //"pGetSearchedLeads111",
                             //"pNewTest1",
+                            "pppp1",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
@@ -974,6 +1133,35 @@ namespace SmarterLead.API.DataServices
                         //{
                         //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
                         //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<string> GetStates()
+        {
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        
+                        var response = await connection.QueryAsync(
+                            "pGetStateCode",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
                     }
                     catch (Exception ex)
                     {

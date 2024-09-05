@@ -7,6 +7,7 @@ using SmarterLead.API.Models.RequestModel;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Linq;
 
 
 namespace SmarterLead.API.Controllers
@@ -63,7 +64,7 @@ namespace SmarterLead.API.Controllers
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
-                        new Claim(ClaimTypes.Name, model.Username)
+                        new Claim(ClaimTypes.Name, model.Email)
                     }),
                     Expires = DateTime.UtcNow.AddHours(2),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -74,6 +75,61 @@ namespace SmarterLead.API.Controllers
                 return Ok(userDetails);
             }
             return Unauthorized();
+        }
+        [HttpPost("LoginOtp")]
+        public async Task<IActionResult> LoginOtp([FromBody] UserLoginRequest model)
+        {
+            //model.otp = GenerateRandomOTP();
+            model.otp = "000000";
+            var resp = await _context.LoginOtp(model);
+            if(resp.Count() > 2 )
+            {
+                return Ok(model.otp);
+            }
+            return StatusCode(404, "An error occurred while finding User. User Details Not Found!");
+            
+            
+        }
+        [HttpPost("VerifyLoginOtp")]
+        public async Task<IActionResult> VerifyLoginOtp(VerifyOtpRequest vor)
+        {
+
+            var userDetails = await _context.ValidateLoginOtp(vor.otp, vor.email);
+            if (userDetails != null)
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_config.GetValue<string>("jwt:key"));
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                        new Claim(ClaimTypes.Name, vor.email)
+                    }),
+                    Expires = DateTime.UtcNow.AddHours(2),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
+                userDetails.Token = tokenString;
+                //return Ok(userDetails);
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+
+
+        }
+        [HttpPost("ResendLoginOtp")]
+        public async Task<IActionResult> ResendLoginOtp([FromBody] VerifyOtpRequest model)
+        {
+            model.otp = GenerateRandomOTP();
+            var resp = await _context.ResendLoginOtp(model);
+            if (resp.Count() > 2)
+            {
+                return Ok(model.otp);
+            }
+            return StatusCode(404, "An error occurred while finding User. User Details Not Found!");
+            
+
         }
         [Authorize]
         [HttpGet("GetUserById")]
@@ -124,7 +180,7 @@ namespace SmarterLead.API.Controllers
         [HttpPost("UpdateProfile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UserProfile request)
         {
-            if (request == null || request.ClientID == null || string.IsNullOrEmpty(request.UserID) || string.IsNullOrEmpty(request.firstname))
+            if (request == null || request.ClientID == null || string.IsNullOrEmpty(request.firstname))
             {
                 return BadRequest("Invalid request.");
             }
@@ -194,6 +250,19 @@ namespace SmarterLead.API.Controllers
 
 
         }
+        [HttpPost("VerifySignUp")]
+        public async Task<IActionResult> VerifySignUp(VerifyOtpRequest vor)
+        {
+
+            var userDetails = await _context.VerifySignUp(vor.otp, vor.email);
+            if (userDetails.Count() > 2)
+            {
+                return Ok(userDetails);
+            }
+            return StatusCode(404, "An error occurred while Verifying signup details. Email Not Found!");
+
+
+        }
         [HttpPost("CreatePassword")]
         public async Task<IActionResult> CreatePassword(CreatePasswordRequest cpr)
         {
@@ -216,6 +285,20 @@ namespace SmarterLead.API.Controllers
                 return Ok(userDetails);
             }
             return Unauthorized();
+        }
+        [HttpGet("GetStates")]
+        //[Authorize]
+        public async Task<IActionResult> GetStates()
+        {
+            //var userDetails = await _context.clientplan.FindAsync(id);
+            var userDetails = await _context.GetStates();
+            if (userDetails != null)
+            {
+                return Ok(userDetails);
+            }
+            return Unauthorized();
+
+
         }
 
     }
