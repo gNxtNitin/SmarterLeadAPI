@@ -61,6 +61,45 @@ namespace SmarterLead.API.DataServices
             }
             return userLogin;
         }
+        public async Task<string> IsOtpRiq(UserLoginRequest user)
+        {
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_email", user.Email, DbType.String);
+                        parameters.Add("_password", user.Password, DbType.String);
+                        //parameters.Add("_otp", user.otp, DbType.String);
+                        var response = await connection.QueryAsync(
+                            "pIsOtpRiq",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (userLogin == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.Email);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.Email);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
         public async Task<string> LoginOtp(UserLoginRequest user)
         {
             string resp = "";
@@ -231,7 +270,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_email", user.email, DbType.String);
                         parameters.Add("_phone", user.phone, DbType.String);
                         parameters.Add("_birthday", user.birthday, DbType.String);
-                        //parameters.Add("_imagepath", user.imagepath, DbType.String);
+                        parameters.Add("_statecode", user.StateName, DbType.String);
                         parameters.Add("_company", user.CompanyName, DbType.String);
                         parameters.Add("_zipcode", user.Zip, DbType.String);
                         parameters.Add("_address", user.Address, DbType.String);
@@ -406,10 +445,11 @@ namespace SmarterLead.API.DataServices
             return resp;
 
         }
-        public async Task<string> VerifySignUp(string otp, string email)
+        public async Task<UserLoginResponse> VerifySignUp(string otp, string email)
         {
-
-            string resp = "";
+            var userLogin = new UserLoginResponse();
+            DataTable dt = new DataTable();
+            //string resp = "";
             try
             {
                 using (var connection = new MySqlConnection(Database.GetConnectionString()))
@@ -422,11 +462,11 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_otp", otp, DbType.String);
 
 
-                        var response = await connection.QueryAsync(
+                        userLogin = await connection.QueryFirstOrDefaultAsync<UserLoginResponse>(
                             "pVerifySignUp",
                             parameters,
                             commandType: CommandType.StoredProcedure);
-                        resp = JsonConvert.SerializeObject(response);
+                        
                     }
                     catch (Exception ex)
                     {
@@ -438,7 +478,7 @@ namespace SmarterLead.API.DataServices
             {
 
             }
-            return resp;
+            return userLogin;
 
         }
         public async Task<string> CreatePassword(CreatePasswordRequest cpr)
@@ -565,8 +605,8 @@ namespace SmarterLead.API.DataServices
                         var parameters = new DynamicParameters();
                         parameters.Add("_clientLoginID", clientLoginId, DbType.String);
                         var response = await connection.QueryAsync(
-                            "pGetDashboardLeadStats",
-                            //"potest",
+                            //"pGetDashboardLeadStats",
+                            "potest",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);

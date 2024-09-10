@@ -76,6 +76,20 @@ namespace SmarterLead.API.Controllers
             }
             return Unauthorized();
         }
+        //[HttpPost("IsOtpRiq")]
+        //public async Task<IActionResult> IsOtpRiq([FromBody] UserLoginRequest model)
+        //{
+        //    //model.otp = GenerateRandomOTP();
+        //    model.otp = "000000";
+        //    var resp = await _context.LoginOtp(model);
+        //    if (resp.Count() > 2)
+        //    {
+        //        return Ok(model.otp);
+        //    }
+        //    return StatusCode(404, "An error occurred while finding User. User Details Not Found!");
+
+
+        //}
         [HttpPost("LoginOtp")]
         public async Task<IActionResult> LoginOtp([FromBody] UserLoginRequest model)
         {
@@ -255,9 +269,24 @@ namespace SmarterLead.API.Controllers
         {
 
             var userDetails = await _context.VerifySignUp(vor.otp, vor.email);
-            if (userDetails.Count() > 2)
+            if (userDetails != null)
             {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_config.GetValue<string>("jwt:key"));
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                        new Claim(ClaimTypes.Name, vor.email)
+                    }),
+                    Expires = DateTime.UtcNow.AddHours(2),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
+                userDetails.Token = tokenString;
                 return Ok(userDetails);
+                //return Ok(userDetails);
             }
             return StatusCode(404, "An error occurred while Verifying signup details. Email Not Found!");
 
