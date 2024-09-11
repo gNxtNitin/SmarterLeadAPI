@@ -178,20 +178,20 @@ namespace SmarterLead.API.Controllers
 
 
         }
-        [HttpGet("DownloadLeads")]
-        [Authorize]
-        public async Task<IActionResult> DownloadLeads(int clientID, int searchID, int dwdCount)
-        {
-            //var userDetails = await _context.clientplan.FindAsync(id);
-            var userDetails = await _context.GetPlans();
-            if (userDetails != null)
-            {
-                return Ok(userDetails);
-            }
-            return Unauthorized();
+        //[HttpGet("DownloadLeads")]
+        //[Authorize]
+        //public async Task<IActionResult> DownloadLeads(int clientID, int searchID, int dwdCount)
+        //{
+        //    //var userDetails = await _context.clientplan.FindAsync(id);
+        //    var userDetails = await _context.GetPlans();
+        //    if (userDetails != null)
+        //    {
+        //        return Ok(userDetails);
+        //    }
+        //    return Unauthorized();
 
 
-        }
+        //}
         
     }
 }

@@ -61,45 +61,45 @@ namespace SmarterLead.API.DataServices
             }
             return userLogin;
         }
-        public async Task<string> IsOtpRiq(UserLoginRequest user)
-        {
-            string resp = "";
-            try
-            {
-                using (var connection = new MySqlConnection(Database.GetConnectionString()))
-                {
-                    try
-                    {
-                        var parameters = new DynamicParameters();
-                        parameters.Add("_email", user.Email, DbType.String);
-                        parameters.Add("_password", user.Password, DbType.String);
-                        //parameters.Add("_otp", user.otp, DbType.String);
-                        var response = await connection.QueryAsync(
-                            "pIsOtpRiq",
-                            parameters,
-                            commandType: CommandType.StoredProcedure);
-                        resp = JsonConvert.SerializeObject(response);
-                        //if (userLogin == null)
-                        //{
-                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.Email);
-                        //}
-                        //else
-                        //{
-                        //    _logger.LogInformation("User with UserId: {UserId} found", user.Email);
-                        //}
-                    }
-                    catch (Exception ex)
-                    {
-                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
+        //public async Task<string> IsOtpRiq(UserLoginRequest user)
+        //{
+        //    string resp = "";
+        //    try
+        //    {
+        //        using (var connection = new MySqlConnection(Database.GetConnectionString()))
+        //        {
+        //            try
+        //            {
+        //                var parameters = new DynamicParameters();
+        //                parameters.Add("_email", user.Email, DbType.String);
+        //                parameters.Add("_password", user.Password, DbType.String);
+        //                //parameters.Add("_otp", user.otp, DbType.String);
+        //                var response = await connection.QueryAsync(
+        //                    "pIsOtpRiq",
+        //                    parameters,
+        //                    commandType: CommandType.StoredProcedure);
+        //                resp = JsonConvert.SerializeObject(response);
+        //                //if (userLogin == null)
+        //                //{
+        //                //    _logger.LogWarning("User with UserId: {UserId} not found", user.Email);
+        //                //}
+        //                //else
+        //                //{
+        //                //    _logger.LogInformation("User with UserId: {UserId} found", user.Email);
+        //                //}
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-            }
-            return resp;
-        }
+        //    }
+        //    return resp;
+        //}
         public async Task<string> LoginOtp(UserLoginRequest user)
         {
             string resp = "";

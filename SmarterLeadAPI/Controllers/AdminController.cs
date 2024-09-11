@@ -8,6 +8,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Linq;
+using System.Data;
+using Newtonsoft.Json;
+using SmarterLeadAPI;
 
 
 namespace SmarterLead.API.Controllers
@@ -96,9 +99,36 @@ namespace SmarterLead.API.Controllers
             //model.otp = GenerateRandomOTP();
             model.otp = "000000";
             var resp = await _context.LoginOtp(model);
-            if(resp.Count() > 2 )
+            var p = resp.Count();
+            if (p > 40)
             {
-                return Ok(model.otp);
+                var userDetails = await _context.ValidateUser(model);
+                if (userDetails != null)
+                {
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var key = Encoding.ASCII.GetBytes(_config.GetValue<string>("jwt:key"));
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(new Claim[]
+                        {
+                        new Claim(ClaimTypes.Name, model.Email)
+                        }),
+                        Expires = DateTime.UtcNow.AddHours(2),
+                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                    };
+                    var token = tokenHandler.CreateToken(tokenDescriptor);
+                    var tokenString = tokenHandler.WriteToken(token);
+                    userDetails.Token = tokenString;
+                    return Ok(userDetails);
+                }
+            }
+            if(p > 2 && p < 40 )
+            {
+                var pp = JsonConvert.DeserializeObject<List<OtpRiq>>(resp);
+                pp[0].otp = model.otp;
+                //var qq = pp[0].pOtpTimeOut;
+                //var re = new { otp = model.otp, resp = resp };
+                return Ok(pp[0]);
             }
             return StatusCode(404, "An error occurred while finding User. User Details Not Found!");
             
