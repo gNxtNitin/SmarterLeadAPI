@@ -5,6 +5,7 @@ using MySqlConnector;
 using Newtonsoft.Json;
 using SmarterLead.API.Models.RequestModel;
 using SmarterLead.API.Models.ResponseModel;
+using Sprache;
 using Stripe;
 using System.Data;
 using System.Threading.Tasks;
@@ -280,6 +281,30 @@ namespace SmarterLead.API.DataServices
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
+                        if (resp != "0")
+                        {
+                            var result = new List<string>();
+
+                            for (int i = 0; i < 4; i++)
+                            {
+                                result.Add("0");  // Add a string "0" to the list
+                            }
+                            
+                            foreach (string item in user.roleid)
+                            {
+                                result[Int32.Parse(item)] = "1";
+                            }
+                            var param = result[1] + "," + result[2] + "," + result[3];
+                            var parameters1 = new DynamicParameters();
+                            parameters1.Add("_email", user.email, DbType.String);
+                            parameters1.Add("param", param, DbType.String);
+                            var response1 = await connection.ExecuteAsync(
+                                "pupdaterole",
+                                parameters1,
+                                commandType: CommandType.StoredProcedure);
+                            
+
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -361,6 +386,21 @@ namespace SmarterLead.API.DataServices
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
+                        if (resp != "0")
+                        {
+                            foreach ( string item in  user.roleid )
+                            {
+                                
+                                var parameters1 = new DynamicParameters();
+                                parameters1.Add("_email", user.email, DbType.String);
+                                parameters1.Add("_roleid", Int32.Parse(item), DbType.Int32);
+                                var response1 = await connection.ExecuteAsync(
+                                "pinsertrole",
+                                parameters1,
+                                commandType: CommandType.StoredProcedure);
+                            }
+                            
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -681,11 +721,12 @@ namespace SmarterLead.API.DataServices
                         var parameters = new DynamicParameters();
                         parameters.Add("_clientID", r.ClientLoginID, DbType.Int32);
                         parameters.Add("_userLimit", r.UserLimit, DbType.Int32);
-                        parameters.Add("_stateCode", r.State, DbType.String);
-                        parameters.Add("_entityType", r.EntityType, DbType.String);
-                        parameters.Add("_cargoCarriedName", r.CargoCarried, DbType.String);
-                        parameters.Add("_operatingStatus", r.Classifications, DbType.String);
-                        parameters.Add("_carcarried", r.CargoCarried, DbType.String);
+                        parameters.Add("_stateCode", r.statetext, DbType.String);
+                        parameters.Add("_entityType", r.entitytypetext, DbType.String);
+                        parameters.Add("_role", r.role, DbType.Int32);
+                        parameters.Add("_cargoCarriedName", r.cargocarriedtext, DbType.String);
+                        parameters.Add("_operation", r.classificationtext, DbType.String);
+                        //parameters.Add("_carcarried", r.CargoCarried, DbType.String);
                         parameters.Add("_fromPU", r.PowerUnitSt, DbType.Int32);
                         parameters.Add("_toPU", r.PowerUnitEnd, DbType.Int32);
                         parameters.Add("_fromTD", r.DriverSt, DbType.Int32);
@@ -702,7 +743,7 @@ namespace SmarterLead.API.DataServices
                         var response = await connection.QueryAsync(
                             //"pGetSearchedLeads111",
                             //"pNewTest1",
-                            "pppp1",
+                            "pppp2",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
@@ -750,7 +791,11 @@ namespace SmarterLead.API.DataServices
                             //data.Add(resultSet3);
 
                             var resultSet4 = multi.Read<dynamic>().ToList();
-                            data = [resultSet1, resultSet2, resultSet3, resultSet4];
+
+
+                            var resultSet5 = multi.Read<dynamic>().ToList();
+
+                            data = [resultSet1, resultSet2, resultSet3, resultSet4, resultSet5];
 
 
                         }
@@ -1186,22 +1231,60 @@ namespace SmarterLead.API.DataServices
             }
             return resp;
         }
-        public async Task<string> GetStates()
+        //public async Task<string> GetStates()
+        //{
+        //    string resp = "";
+        //    try
+        //    {
+        //        using (var connection = new MySqlConnection(Database.GetConnectionString()))
+        //        {
+        //            try
+        //            {
+        //                var parameters = new DynamicParameters();
+                        
+        //                var response = await connection.QueryAsync(
+        //                    "pGetStateCode",
+        //                    parameters,
+        //                    commandType: CommandType.StoredProcedure);
+        //                resp = JsonConvert.SerializeObject(response);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //    }
+        //    return resp;
+        //}
+        public async Task<List<List<dynamic>>> GetStates()
         {
             string resp = "";
+            List<List<dynamic>> data = new List<List<dynamic>>();
             try
             {
                 using (var connection = new MySqlConnection(Database.GetConnectionString()))
                 {
                     try
                     {
-                        var parameters = new DynamicParameters();
+
+                        using (var multi = await connection.QueryMultipleAsync("pGetStateCode", commandType: CommandType.StoredProcedure))
+                        {
+                            var resultSet1 = multi.Read<dynamic>().ToList();
+                            //data.Add(resultSet1);
+
+                            var resultSet2 = multi.Read<dynamic>().ToList();
+                            //data.Add(resultSet2);
+
+                            
+                            data = [resultSet1, resultSet2];
+
+
+                        }
                         
-                        var response = await connection.QueryAsync(
-                            "pGetStateCode",
-                            parameters,
-                            commandType: CommandType.StoredProcedure);
-                        resp = JsonConvert.SerializeObject(response);
                     }
                     catch (Exception ex)
                     {
@@ -1213,7 +1296,7 @@ namespace SmarterLead.API.DataServices
             {
 
             }
-            return resp;
+            return data;
         }
     }
 }

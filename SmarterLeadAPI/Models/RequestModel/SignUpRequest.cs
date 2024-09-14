@@ -42,6 +42,7 @@ namespace SmarterLead.API.Models.RequestModel
 
         public string otp { get; set; }
         public string? company { get; set; }
+        public List<string> roleid { get; set; }
         //public string? tkn { get; set; }
 
 

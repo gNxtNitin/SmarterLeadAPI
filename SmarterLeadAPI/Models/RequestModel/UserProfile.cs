@@ -15,5 +15,6 @@
         public string? imagepath { get; set; }
         public string? CompanyName { get; set; }
         public string? birthday { get; set; }
+        public List<string>? roleid { get; set; }
     }
 }

@@ -7,11 +7,16 @@ namespace SmarterLead.API.Models.RequestModel
     {
         public int? ClientLoginID { get; set; }
         public int? UserLimit { get; set; }
-        public string? State {get;set;}
-        public string? EntityType {get;set;}
-        public string? Cargo {get;set;}
-        public string? Classifications {get;set;}
-        public string? CargoCarried { get; set; }
+        public List<string>? State { get; set; }
+
+        public List<string>? EntityType { get; set; }
+        public string? role { get; set; }
+        public List<string>? Classifications { get; set; }
+        public List<string>? CargoCarried { get; set; }
+        public string? statetext { get; set; }
+        public string? cargocarriedtext { get; set; }
+        public string? classificationtext { get; set; }
+        public string? entitytypetext { get; set; }
         public string? PowerUnitSt {get;set;}
         public string? PowerUnitEnd {get;set;}
         public string? DriverSt {get;set;}
