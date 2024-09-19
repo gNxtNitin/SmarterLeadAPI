@@ -270,7 +270,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_lastname", user.lastname, DbType.String);
                         parameters.Add("_email", user.email, DbType.String);
                         parameters.Add("_phone", user.phone, DbType.String);
-                        parameters.Add("_birthday", user.birthday, DbType.String);
+                        //parameters.Add("_birthday", user.birthday, DbType.String);
                         parameters.Add("_statecode", user.StateName, DbType.String);
                         parameters.Add("_company", user.CompanyName, DbType.String);
                         parameters.Add("_zipcode", user.Zip, DbType.String);
@@ -743,7 +743,7 @@ namespace SmarterLead.API.DataServices
                         var response = await connection.QueryAsync(
                             //"pGetSearchedLeads111",
                             //"pNewTest1",
-                            "pppp2",
+                            "pppp3",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
