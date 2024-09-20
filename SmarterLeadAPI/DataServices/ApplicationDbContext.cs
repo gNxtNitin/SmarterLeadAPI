@@ -1174,7 +1174,8 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_paymentStatus", r.PaymentStatus, DbType.String);
                         parameters.Add("_invoiceNumber", r.InvoiceNumber, DbType.String);
                         parameters.Add("_invoiceAmount", r.InvoiceAmount, DbType.String);
-
+                        parameters.Add("_couponCode", r.CouponCode, DbType.String);
+                        parameters.Add("_planID", r.PlanID, DbType.Int32);
                         var response = await connection.ExecuteAsync(
                             "pSavePayment",
                             parameters,
@@ -1297,6 +1298,39 @@ namespace SmarterLead.API.DataServices
 
             }
             return data;
+        }
+
+        public async Task<string> CheckCoupon(string cc)
+        {
+
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+
+                        parameters.Add("_couponCode", cc, DbType.String);
+                        var response = await connection.QueryAsync(
+                            "pCheckCoupon",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+
         }
     }
 }

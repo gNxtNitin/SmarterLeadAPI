@@ -8,6 +8,8 @@
         public string PaymentStatus { get; set; }
         public string InvoiceNumber { get; set; }
         public string InvoiceAmount { get; set; }
-       
+        public string? CouponCode { get; set; }
+        public string? PlanID { get; set; }
+
     }
 }

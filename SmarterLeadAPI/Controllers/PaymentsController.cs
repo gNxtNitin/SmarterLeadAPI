@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SmarterLead.API.DataServices;
+using SmarterLead.API.Helper;
 using SmarterLead.API.Models.RequestModel;
 using Stripe;
 using Stripe.Checkout;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace SmarterLead.API.Controllers;
 
@@ -11,15 +13,19 @@ namespace SmarterLead.API.Controllers;
 [ApiController]
 public class PaymentsController : Controller
 {
+    private IConfiguration _config;
     private readonly IOptions<StripeOptions> options;
     private readonly IStripeClient client;
     private readonly ApplicationDbContext _context;
+    public CPAService _service;
 
-    public PaymentsController(IOptions<StripeOptions> options, ApplicationDbContext context)
+    public PaymentsController(IOptions<StripeOptions> options, IConfiguration config, ApplicationDbContext context)
     {
+        _config = config;
         this.options = options;
         _context = context;
         this.client = new StripeClient(this.options.Value.SecretKey);
+        _service = new CPAService(_config);
     }
 
     [HttpGet("config")]
@@ -35,17 +41,11 @@ public class PaymentsController : Controller
         };
     }
 
-    [HttpGet("Testing")]
-    public async Task<ActionResult> CreateCheckoutSession1()
+    [HttpPost("Create-Prouct-Checkout-Session")]
+    public async Task<ActionResult> CreateCheckoutSessionByProduct([FromBody] ProductRequest pr)
     {
-        var options1 = new CouponCreateOptions
-        {
-            Duration = "repeating",
-            DurationInMonths = 3,
-            PercentOff = 25.5M,
-        };
-        var service1 = new CouponService();
-        service1.Create(options1);
+        var tkn1 = pr.CouponCode + "&" + pr.ProductId;
+        tkn1 = await _service.Encrypt(tkn1);
         var options = new SessionCreateOptions
         {
 
@@ -59,17 +59,21 @@ public class PaymentsController : Controller
                     Currency = "usd",
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
-                        Name = "Sample Product",
+                        Name = pr.ProductName,
+                        Description = pr.ProductDescription,
                     },
-                    UnitAmount = 200000, // Amount in cents
+                    UnitAmount = int.Parse(pr.ProductPrice) * 100, // Amount in cents
                 },
                 Quantity = 1,
             },
         },
             Mode = "payment",
-            SuccessUrl = "https://localhost:7184/Payments/success?session_id={CHECKOUT_SESSION_ID}",
-            CancelUrl = "https://localhost:7184/Payments/Fail",
+            //SuccessUrl = "https://localhost:7184/Payments/success?session_id={CHECKOUT_SESSION_ID}",
+            //CancelUrl = "https://localhost:7184/Payments/Fail"
+            SuccessUrl = pr.SuccessUrl + "?id={CHECKOUT_SESSION_ID}" + "&cc=" + tkn1,
+            CancelUrl = pr.FailedUrl,
         };
+
 
         //var percentageOff = 20 / 100.0; // Assume the DiscountValue is 20 for 20% off
         //var discountAmount = 200000 * percentageOff;
@@ -92,40 +96,40 @@ public class PaymentsController : Controller
 
         //options.LineItems[0].PriceData.UnitAmount = 200000 - (int)discountAmount;
 
-        //if (coupon != null && coupon.IsValid) // Check if the coupon is valid
-        //{
-        //    // If it's a percentage discount
-        //    if (coupon.DiscountType == "percentage")
-        //    {
-        //        var percentageOff = coupon.DiscountValue / 100.0; // Assume the DiscountValue is 20 for 20% off
-        //        var discountAmount = productPrice * percentageOff;
-        //        options.Discounts = new List<SessionDiscountOptions>
-        //    {
-        //        new SessionDiscountOptions
-        //        {
-        //            // Manually create a discount for the percentage off
-        //            Coupon = "manual_coupon_" + couponCode // This can be a unique identifier for tracking
-        //        }
-        //    };
+        if (pr.IsCoupon != false) // Check if the coupon is valid
+        {
+            // If it's a percentage discount
+            if (pr.DiscountType == "P")
+            {
+                var percentageOff = float.Parse(pr.DiscountValue) / 100.0; // Assume the DiscountValue is 20 for 20% off
+                var discountAmount = float.Parse(pr.ProductPrice) * percentageOff;
+                //options.Discounts = new List<SessionDiscountOptions>
+            // {
+                //new SessionDiscountOptions
+                //{
+                //    // Manually create a discount for the percentage off
+                //    Coupon = "manual_coupon_" + pr.CouponCode, // This can be a unique identifier for tracking
+                //}
+            // };
 
-        //        options.LineItems[0].PriceData.UnitAmount = productPrice - (int)discountAmount;
-        //    }
-        //    // If it's a fixed amount discount
-        //    else if (coupon.DiscountType == "fixed")
-        //    {
-        //        var discountAmount = coupon.DiscountValue * 100; // Convert to cents (e.g., $10 off becomes 1000)
-        //        options.Discounts = new List<SessionDiscountOptions>
-        //    {
-        //        new SessionDiscountOptions
-        //        {
-        //            // Manually create a discount for the fixed amount off
-        //            Coupon = "manual_coupon_" + couponCode // Unique identifier for tracking
-        //        }
-        //    };
+                options.LineItems[0].PriceData.UnitAmount = (int) (int.Parse(pr.ProductPrice) - discountAmount) * 100;
+            }
+            // If it's a fixed amount discount
+            else
+            {
+                var discountAmount = int.Parse(pr.DiscountValue) * 100; // Convert to cents (e.g., $10 off becomes 1000)
+                //options.Discounts = new List<SessionDiscountOptions>
+            //{
+            //    new SessionDiscountOptions
+            //    {
+            //        // Manually create a discount for the fixed amount off
+            //        Coupon = "manual_coupon_" + pr.CouponCode, // Unique identifier for tracking
+            //    }
+            //};
 
-        //        options.LineItems[0].PriceData.UnitAmount = productPrice - discountAmount;
-        //    }
-        //}
+                options.LineItems[0].PriceData.UnitAmount = (int.Parse(pr.ProductPrice) - discountAmount) * 100;
+            }
+        }
 
         // Apply coupon if available
         //if (!string.IsNullOrEmpty(couponCode))
@@ -266,6 +270,19 @@ public class PaymentsController : Controller
         var leadsCount = await _context.PaymentDataUpdate(r);
 
         if (leadsCount != "")
+        {
+            return Ok(leadsCount);
+        }
+        return Unauthorized();
+    }
+    [HttpGet("CheckCoupon")]
+    //[Authorize]
+    public async Task<IActionResult> CheckCoupon(string cc)
+    {
+
+        var leadsCount = await _context.CheckCoupon(cc);
+
+        if (leadsCount.Count() > 2)
         {
             return Ok(leadsCount);
         }
