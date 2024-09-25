@@ -22,12 +22,12 @@ namespace SmarterLead.API.Controllers
 
         private IConfiguration _config;
         private readonly ApplicationDbContext _context;
-        
+
         public AdminController(IConfiguration config, ApplicationDbContext context)
         {
             _config = config;
             _context = context;
-            
+
         }
         private string GenerateRandomOTP()
 
@@ -59,7 +59,7 @@ namespace SmarterLead.API.Controllers
         public async Task<IActionResult> Login([FromBody] UserLoginRequest model)
         {
             var userDetails = await _context.ValidateUser(model);
-            if (userDetails !=null)
+            if (userDetails != null)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_config.GetValue<string>("jwt:key"));
@@ -122,7 +122,7 @@ namespace SmarterLead.API.Controllers
                     return Ok(userDetails);
                 }
             }
-            if(p > 2 && p < 40 )
+            if (p > 2 && p < 40)
             {
                 var pp = JsonConvert.DeserializeObject<List<OtpRiq>>(resp);
                 pp[0].otp = model.otp;
@@ -131,8 +131,8 @@ namespace SmarterLead.API.Controllers
                 return Ok(pp[0]);
             }
             return StatusCode(404, "An error occurred while finding User. User Details Not Found!");
-            
-            
+
+
         }
         [HttpPost("VerifyLoginOtp")]
         public async Task<IActionResult> VerifyLoginOtp(VerifyOtpRequest vor)
@@ -172,12 +172,12 @@ namespace SmarterLead.API.Controllers
                 return Ok(model.otp);
             }
             return StatusCode(404, "An error occurred while finding User. User Details Not Found!");
-            
+
 
         }
         [Authorize]
         [HttpGet("GetUserById")]
-        public async Task<IActionResult> GetUserById( int userId)
+        public async Task<IActionResult> GetUserById(int userId)
         {
             var userDetails = await _context.GetUserById(userId);
             if (userDetails != null)
@@ -190,7 +190,7 @@ namespace SmarterLead.API.Controllers
         [HttpPost("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            if (request == null || request.ClientLoginID== null || string.IsNullOrEmpty(request.newpwd) || string.IsNullOrEmpty(request.oldpwd))
+            if (request == null || request.ClientLoginID == null || string.IsNullOrEmpty(request.newpwd) || string.IsNullOrEmpty(request.oldpwd))
             {
                 return BadRequest("Invalid request.");
             }
@@ -201,17 +201,21 @@ namespace SmarterLead.API.Controllers
 
             if (result == "1")
             {
-                return Ok("Password updated successfully.");
+                return Ok("Success");
             }
-            
+            else if (result == "0")
+            {
+                return Ok("Incorrect Password");
+            }
+
             return StatusCode(500, "An error occurred while updating the password.");
-            
+
         }
         //[HttpGet("GetAllUsers")]
-       
+
         //public async Task<IActionResult> GetAllUsers()
         //{
-            
+
         //    var userDetails = await _context.GetAllUsers();
         //    if (userDetails != null)
         //    {
@@ -237,10 +241,10 @@ namespace SmarterLead.API.Controllers
             {
                 return Ok("Profile updated successfully.");
             }
-            
-            
-             return StatusCode(500, "An error occurred while updating the profile.");
-            
+
+
+            return StatusCode(500, "An error occurred while updating the profile.");
+
         }
 
         [HttpGet("GetUserProfile")]
@@ -263,7 +267,7 @@ namespace SmarterLead.API.Controllers
             var userDetails = await _context.SignUp(model);
             if (userDetails != null)
             {
-               
+
                 return Ok(userDetails);
             }
             return Unauthorized();
@@ -277,14 +281,14 @@ namespace SmarterLead.API.Controllers
             if (userDetails.Count() > 2)
             {
                 return Ok(otp);
-                
+
             }
             return StatusCode(404, "An error occurred while finding email. Email Not Found!");
         }
         [HttpPost("VerifyOtp")]
         public async Task<IActionResult> VerifyOtp(VerifyOtpRequest vor)
         {
-            
+
             var userDetails = await _context.VerifyOtp(vor.otp, vor.email);
             if (userDetails.Count() > 2)
             {
@@ -325,7 +329,7 @@ namespace SmarterLead.API.Controllers
         [HttpPost("CreatePassword")]
         public async Task<IActionResult> CreatePassword(CreatePasswordRequest cpr)
         {
-            
+
             var userDetails = await _context.CreatePassword(cpr);
             //var pp= userDetails.Count();
             if (userDetails != "0")

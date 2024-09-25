@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using SmarterLead.API.DataServices;
 using SmarterLead.API.Helper;
 using SmarterLead.API.Models.RequestModel;
 using Stripe;
 using Stripe.Checkout;
+using System.Web;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace SmarterLead.API.Controllers;
@@ -44,12 +46,29 @@ public class PaymentsController : Controller
     [HttpPost("Create-Prouct-Checkout-Session")]
     public async Task<ActionResult> CreateCheckoutSessionByProduct([FromBody] ProductRequest pr)
     {
-        var tkn1 = pr.CouponCode + "&" + pr.ProductId;
-        tkn1 = await _service.Encrypt(tkn1);
+        var jsonData = new {
+                CouponCode = (pr.CouponCode == null ? "X" : pr.CouponCode),
+                ProductID = pr.ProductId
+        };
+        
+        
+        var tkn1 = JsonConvert.SerializeObject(jsonData);
+        //var tkn1 = ( pr.CouponCode == null ? "X": pr.CouponCode ) + "&" + pr.ProductId;
+        // tkn1 = await _service.Encrypt(tkn1);
+        
+
+
+        
+        tkn1=await _service.Encrypt(tkn1);
+
+
+        
+
+        tkn1 = Uri.UnescapeDataString(tkn1);
         var options = new SessionCreateOptions
         {
 
-            PaymentMethodTypes = new List<string> { "card" },
+           PaymentMethodTypes = new List<string> { "card" },
             LineItems = new List<SessionLineItemOptions>
         {
             new SessionLineItemOptions
@@ -67,13 +86,15 @@ public class PaymentsController : Controller
                 Quantity = 1,
             },
         },
+            
             Mode = "payment",
             //SuccessUrl = "https://localhost:7184/Payments/success?session_id={CHECKOUT_SESSION_ID}",
             //CancelUrl = "https://localhost:7184/Payments/Fail"
             SuccessUrl = pr.SuccessUrl + "?id={CHECKOUT_SESSION_ID}" + "&cc=" + tkn1,
             CancelUrl = pr.FailedUrl,
+            CustomerEmail = pr.Email,
         };
-
+        //var p = CHECKOUT_SESSION_ID;
 
         //var percentageOff = 20 / 100.0; // Assume the DiscountValue is 20 for 20% off
         //var discountAmount = 200000 * percentageOff;
@@ -104,28 +125,28 @@ public class PaymentsController : Controller
                 var percentageOff = float.Parse(pr.DiscountValue) / 100.0; // Assume the DiscountValue is 20 for 20% off
                 var discountAmount = float.Parse(pr.ProductPrice) * percentageOff;
                 //options.Discounts = new List<SessionDiscountOptions>
-            // {
+                // {
                 //new SessionDiscountOptions
                 //{
                 //    // Manually create a discount for the percentage off
                 //    Coupon = "manual_coupon_" + pr.CouponCode, // This can be a unique identifier for tracking
                 //}
-            // };
+                // };
 
-                options.LineItems[0].PriceData.UnitAmount = (int) (int.Parse(pr.ProductPrice) - discountAmount) * 100;
+                options.LineItems[0].PriceData.UnitAmount = (int)(int.Parse(pr.ProductPrice) - discountAmount) * 100;
             }
             // If it's a fixed amount discount
             else
             {
                 var discountAmount = int.Parse(pr.DiscountValue) * 100; // Convert to cents (e.g., $10 off becomes 1000)
-                //options.Discounts = new List<SessionDiscountOptions>
-            //{
-            //    new SessionDiscountOptions
-            //    {
-            //        // Manually create a discount for the fixed amount off
-            //        Coupon = "manual_coupon_" + pr.CouponCode, // Unique identifier for tracking
-            //    }
-            //};
+                                                                        //options.Discounts = new List<SessionDiscountOptions>
+                                                                        //{
+                                                                        //    new SessionDiscountOptions
+                                                                        //    {
+                                                                        //        // Manually create a discount for the fixed amount off
+                                                                        //        Coupon = "manual_coupon_" + pr.CouponCode, // Unique identifier for tracking
+                                                                        //    }
+                                                                        //};
 
                 options.LineItems[0].PriceData.UnitAmount = (int.Parse(pr.ProductPrice) - discountAmount) * 100;
             }
@@ -181,7 +202,7 @@ public class PaymentsController : Controller
                         Quantity = 1,
                     },
                 },
-             // AutomaticTax = new SessionAutomaticTaxOptions { Enabled = true },
+            // AutomaticTax = new SessionAutomaticTaxOptions { Enabled = true },
         };
         var service = new SessionService(this.client);
         try
@@ -269,7 +290,7 @@ public class PaymentsController : Controller
 
         var leadsCount = await _context.PaymentDataUpdate(r);
 
-        if (leadsCount != "")
+        if (leadsCount.Count() > 2)
         {
             return Ok(leadsCount);
         }

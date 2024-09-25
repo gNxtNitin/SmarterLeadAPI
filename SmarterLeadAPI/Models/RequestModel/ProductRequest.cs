@@ -2,6 +2,7 @@
 {
     public class ProductRequest
     {
+        public string? Email { get; set; }
         public string ProductId { get; set; }
         public string ProductName { get; set; }
         public string ProductDescription { get; set; }

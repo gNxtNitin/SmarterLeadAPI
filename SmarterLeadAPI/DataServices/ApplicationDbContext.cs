@@ -1176,7 +1176,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_invoiceAmount", r.InvoiceAmount, DbType.String);
                         parameters.Add("_couponCode", r.CouponCode, DbType.String);
                         parameters.Add("_planID", r.PlanID, DbType.Int32);
-                        var response = await connection.ExecuteAsync(
+                        var response = await connection.QueryAsync(
                             "pSavePayment",
                             parameters,
                             commandType: CommandType.StoredProcedure);

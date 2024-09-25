@@ -61,9 +61,9 @@ namespace SmarterLead.API.Controllers
         //[Authorize]
         public async Task<IActionResult> GetSearchLeads([FromBody] SearchLeadRequest r)
         {
-            
+
             var leadsCount = await _context.GetSearchLeadStats(r);
-            
+
             if (leadsCount != null)
             {
                 return Ok(leadsCount);
@@ -98,9 +98,9 @@ namespace SmarterLead.API.Controllers
 
         [HttpGet("GetDwldLeadSummary")]
         [Authorize]
-        public async Task<IActionResult> GetDwldLeadSummary(int clientLoginId,int summaryId = 0)
+        public async Task<IActionResult> GetDwldLeadSummary(int clientLoginId, int summaryId = 0)
         {
-            var result = await _context.GetDwldLeadSummary(clientLoginId,summaryId);
+            var result = await _context.GetDwldLeadSummary(clientLoginId, summaryId);
             if (result != null)
             {
                 return Ok(result);
@@ -192,6 +192,6 @@ namespace SmarterLead.API.Controllers
 
 
         //}
-        
+
     }
 }
