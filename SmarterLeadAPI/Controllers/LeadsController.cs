@@ -25,7 +25,7 @@ namespace SmarterLead.API.Controllers
             _service = new CPAService(_config);
         }
         [HttpGet("GetDashboardHeaderDetails")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetDashboardHeaderDetails(int clientLoginId)
         {
             var userDetails = await _context.GetDashBoardHeaders(clientLoginId);
@@ -36,7 +36,7 @@ namespace SmarterLead.API.Controllers
             return Unauthorized();
         }
         [HttpGet("GetDashboardLeadStats")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetDashboardLeadStats(int clientLoginId)
         {
             var userDetails = await _context.GetDashBoardLeadStats(clientLoginId);
@@ -47,7 +47,7 @@ namespace SmarterLead.API.Controllers
             return Unauthorized();
         }
         [HttpGet("GetDashboardPie")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetDashboardPie(int clientLoginId)
         {
             var userDetails = await _context.GetDashBoardPie(clientLoginId);
@@ -58,7 +58,7 @@ namespace SmarterLead.API.Controllers
             return Unauthorized();
         }
         [HttpPost("GetSearchLeads")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetSearchLeads([FromBody] SearchLeadRequest r)
         {
 
@@ -145,12 +145,10 @@ namespace SmarterLead.API.Controllers
                 return Ok(userDetails);
             }
             return Unauthorized();
-
-
         }
 
         [HttpGet("GetCurrentPlan")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetCurrentPlan(int clientLoginId)
         {
             //var userDetails = await _context.clientplan.FindAsync(id);
@@ -175,23 +173,8 @@ namespace SmarterLead.API.Controllers
                 return Ok(userDetails);
             }
             return Unauthorized();
-
-
         }
-        //[HttpGet("DownloadLeads")]
-        //[Authorize]
-        //public async Task<IActionResult> DownloadLeads(int clientID, int searchID, int dwdCount)
-        //{
-        //    //var userDetails = await _context.clientplan.FindAsync(id);
-        //    var userDetails = await _context.GetPlans();
-        //    if (userDetails != null)
-        //    {
-        //        return Ok(userDetails);
-        //    }
-        //    return Unauthorized();
-
-
-        //}
+        
 
     }
 }

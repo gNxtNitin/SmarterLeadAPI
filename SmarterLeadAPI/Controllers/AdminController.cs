@@ -241,6 +241,10 @@ namespace SmarterLead.API.Controllers
             {
                 return Ok("Profile updated successfully.");
             }
+            else if (result == "0")
+            {
+                return StatusCode(404, "An error occurred while finding User. User Details Not Found!");
+            }
 
 
             return StatusCode(500, "An error occurred while updating the profile.");
@@ -248,7 +252,7 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpGet("GetUserProfile")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetUserProfile(int clientLoginId)
         {
             //var userDetails = await _context.clientplan.FindAsync(id);
@@ -270,7 +274,7 @@ namespace SmarterLead.API.Controllers
 
                 return Ok(userDetails);
             }
-            return Unauthorized();
+            return StatusCode(404, "An error occurred ");
         }
         [HttpPost("ForgotPassword")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest fpr)
@@ -302,9 +306,12 @@ namespace SmarterLead.API.Controllers
         public async Task<IActionResult> VerifySignUp(VerifyOtpRequest vor)
         {
 
-            var userDetails = await _context.VerifySignUp(vor.otp, vor.email);
-            if (userDetails != null)
+            UserLoginResponse userDetails = await _context.VerifySignUp(vor);
+            if (userDetails.ClientLoginId != null)
             {
+
+
+
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_config.GetValue<string>("jwt:key"));
                 var tokenDescriptor = new SecurityTokenDescriptor
@@ -320,11 +327,8 @@ namespace SmarterLead.API.Controllers
                 var tokenString = tokenHandler.WriteToken(token);
                 userDetails.Token = tokenString;
                 return Ok(userDetails);
-                //return Ok(userDetails);
             }
             return StatusCode(404, "An error occurred while Verifying signup details. Email Not Found!");
-
-
         }
         [HttpPost("CreatePassword")]
         public async Task<IActionResult> CreatePassword(CreatePasswordRequest cpr)
@@ -359,7 +363,7 @@ namespace SmarterLead.API.Controllers
             {
                 return Ok(userDetails);
             }
-            return Unauthorized();
+            return StatusCode(404, "An error occurred while finding States"); ;
 
 
         }

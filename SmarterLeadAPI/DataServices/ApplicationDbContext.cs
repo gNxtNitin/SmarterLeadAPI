@@ -485,10 +485,10 @@ namespace SmarterLead.API.DataServices
             return resp;
 
         }
-        public async Task<UserLoginResponse> VerifySignUp(string otp, string email)
+        public async Task<UserLoginResponse> VerifySignUp(VerifyOtpRequest vor)
         {
             var userLogin = new UserLoginResponse();
-            DataTable dt = new DataTable();
+            //DataTable dt = new DataTable();
             //string resp = "";
             try
             {
@@ -498,25 +498,25 @@ namespace SmarterLead.API.DataServices
                     {
                         var parameters = new DynamicParameters();
 
-                        parameters.Add("_email", email, DbType.String);
-                        parameters.Add("_otp", otp, DbType.String);
+                        parameters.Add("_email", vor.email, DbType.String);
+                        parameters.Add("_otp", vor.otp, DbType.String);
 
 
                         userLogin = await connection.QueryFirstOrDefaultAsync<UserLoginResponse>(
                             "pVerifySignUp",
                             parameters,
                             commandType: CommandType.StoredProcedure);
-                        
+                        //return userLogin;
                     }
                     catch (Exception ex)
                     {
-                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}");
                     }
                 }
             }
             catch (Exception ex)
             {
-
+                //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}");
             }
             return userLogin;
 

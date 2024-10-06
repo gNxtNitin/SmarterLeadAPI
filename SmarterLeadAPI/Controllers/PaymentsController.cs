@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using SmarterLead.API.DataServices;
@@ -44,6 +45,7 @@ public class PaymentsController : Controller
     }
 
     [HttpPost("Create-Prouct-Checkout-Session")]
+    [Authorize]
     public async Task<ActionResult> CreateCheckoutSessionByProduct([FromBody] ProductRequest pr)
     {
         var jsonData = new {
@@ -63,8 +65,8 @@ public class PaymentsController : Controller
 
 
         
-
-        tkn1 = Uri.UnescapeDataString(tkn1);
+        tkn1 = HttpUtility.UrlEncode(tkn1);
+        //tkn1 = Uri.UnescapeDataString(tkn1);
         var options = new SessionCreateOptions
         {
 
@@ -187,6 +189,7 @@ public class PaymentsController : Controller
 
 
     [HttpPost("create-checkout-session")]
+    [Authorize]
     public async Task<IActionResult> CreateCheckoutSession([FromBody] PriceTag sk)
     {
         var options = new SessionCreateOptions
@@ -284,28 +287,28 @@ public class PaymentsController : Controller
         return Ok();
     }
     [HttpPost("SaveData")]
-    //[Authorize]
+    [Authorize]
     public async Task<IActionResult> SaveData([FromBody] PaymentDataRequest r)
     {
 
-        var leadsCount = await _context.PaymentDataUpdate(r);
+        var result = await _context.PaymentDataUpdate(r);
 
-        if (leadsCount.Count() > 2)
+        if (result.Count() > 2)
         {
-            return Ok(leadsCount);
+            return Ok(result);
         }
         return Unauthorized();
     }
     [HttpGet("CheckCoupon")]
-    //[Authorize]
+    [Authorize]
     public async Task<IActionResult> CheckCoupon(string cc)
     {
 
-        var leadsCount = await _context.CheckCoupon(cc);
+        var result = await _context.CheckCoupon(cc);
 
-        if (leadsCount.Count() > 2)
+        if (result.Count() > 2)
         {
-            return Ok(leadsCount);
+            return Ok(result);
         }
         return Unauthorized();
     }
