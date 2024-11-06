@@ -16,14 +16,16 @@ namespace SmarterLead.API.Controllers;
 [ApiController]
 public class PaymentsController : Controller
 {
+    private readonly ILogger<PaymentsController> _logger;
     private IConfiguration _config;
     private readonly IOptions<StripeOptions> options;
     private readonly IStripeClient client;
     private readonly ApplicationDbContext _context;
     public CPAService _service;
 
-    public PaymentsController(IOptions<StripeOptions> options, IConfiguration config, ApplicationDbContext context)
+    public PaymentsController(IOptions<StripeOptions> options, ILogger<PaymentsController> logger, IConfiguration config, ApplicationDbContext context)
     {
+        _logger = logger;
         _config = config;
         this.options = options;
         _context = context;
@@ -95,6 +97,8 @@ public class PaymentsController : Controller
             SuccessUrl = pr.SuccessUrl + "?id={CHECKOUT_SESSION_ID}" + "&cc=" + tkn1,
             CancelUrl = pr.FailedUrl,
             CustomerEmail = pr.Email,
+            
+
         };
         //var p = CHECKOUT_SESSION_ID;
 
@@ -154,37 +158,18 @@ public class PaymentsController : Controller
             }
         }
 
-        // Apply coupon if available
-        //if (!string.IsNullOrEmpty(couponCode))
-        //{
-        //    var couponService = new CouponService();
-        //    try
-        //    {
-        //        var coupon = couponService.Get(couponCode);
+       
+        try
+        {
+            var service = new SessionService(this.client);
+            Session session = await service.CreateAsync(options);
 
-        //        if (coupon.Valid)
-        //        {
-        //            options.Discounts = new List<SessionDiscountOptions>
-        //        {
-        //            new SessionDiscountOptions
-        //            {
-        //                Coupon = coupon.Id
-        //            }
-        //        };
-        //        }
-        //    }
-        //    catch (StripeException e)
-        //    {
-        //        // Handle invalid coupon code (e.g., coupon not found or expired)
-        //        ViewBag.Error = "Invalid coupon code.";
-        //        return View("Error");
-        //    }
-        //}
-
-        var service = new SessionService(this.client);
-        Session session = await service.CreateAsync(options);
-
-        return Ok(session);
+            return Ok(session);
+        }
+        catch (Exception ex) {
+            _logger.LogError(ex, "An exception has occured in creating instance of the stripe Object.");
+            return BadRequest(ex.Message);
+        }
     }
 
 

@@ -1,34 +1,42 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SmarterLead.API.DataServices;
+using SmarterLead.API.Helper;
+using SmarterLead.API.Models.RequestModel;
+using static Org.BouncyCastle.Math.EC.ECCurve;
+using Stripe;
+using System.Text.Json;
 
 namespace SmarterLeadAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
+        private readonly ApplicationDbContext _context;
+        public WeatherForecastController( ApplicationDbContext context)
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
+            
+            _context = context;
+            
+            
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet("zohodata")]
+        //[Authorize]
+        public async Task<IActionResult> Zohodata()
         {
-            _logger.LogInformation("Testing the logger");
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+
+            var leadsCount = await _context.ZohoData("er", "this");
+
+            if (leadsCount != null)
             {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                return Ok(leadsCount);
+            }
+            return BadRequest("Invalid request.");
         }
+
+
     }
 }

@@ -307,8 +307,10 @@ namespace SmarterLead.API.Controllers
         {
 
             UserLoginResponse userDetails = await _context.VerifySignUp(vor);
-            if (userDetails.ClientLoginId != null)
+            if (userDetails == null)
             {
+                return StatusCode(404, "An error occurred while Verifying signup details. Email Not Found!");
+            }
 
 
 
@@ -327,8 +329,8 @@ namespace SmarterLead.API.Controllers
                 var tokenString = tokenHandler.WriteToken(token);
                 userDetails.Token = tokenString;
                 return Ok(userDetails);
-            }
-            return StatusCode(404, "An error occurred while Verifying signup details. Email Not Found!");
+            
+            
         }
         [HttpPost("CreatePassword")]
         public async Task<IActionResult> CreatePassword(CreatePasswordRequest cpr)

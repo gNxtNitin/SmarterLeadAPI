@@ -506,7 +506,15 @@ namespace SmarterLead.API.DataServices
                             "pVerifySignUp",
                             parameters,
                             commandType: CommandType.StoredProcedure);
-                        //return userLogin;
+                        if (userLogin == null)
+                        {
+                            _logger.LogWarning("User with UserId: {UserId} not found", vor.email);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("User with UserId: {UserId} found", vor.email);
+                        }
+                        return userLogin;
                     }
                     catch (Exception ex)
                     {
@@ -1049,8 +1057,8 @@ namespace SmarterLead.API.DataServices
                     {
                         var parameters = new DynamicParameters();
                         parameters.Add("_ClientPlanID", ClientPlanID);
-                        var response = await connection.QueryAsync(
-                            "pGetInvoice",
+                        var response = await connection.QueryFirstOrDefaultAsync<InvoiceRequest>(
+                            "invoicenew",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         //return response;
@@ -1315,6 +1323,43 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_couponCode", cc, DbType.String);
                         var response = await connection.QueryAsync(
                             "pCheckCoupon",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+
+        }
+
+        public async Task<string> ZohoData(string id, string message)
+        {
+
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+
+                        parameters.Add("_id", id, DbType.String);
+                        parameters.Add("_message", message, DbType.String);
+
+
+                        var response = await connection.ExecuteAsync(
+                            //"pCreatePassword",
+                            "polo",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
