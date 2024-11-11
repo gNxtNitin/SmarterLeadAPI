@@ -1058,7 +1058,7 @@ namespace SmarterLead.API.DataServices
                         var parameters = new DynamicParameters();
                         parameters.Add("_ClientPlanID", ClientPlanID);
                         var response = await connection.QueryFirstOrDefaultAsync<InvoiceRequest>(
-                            "invoicenew",
+                            "pGetInvoice",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         //return response;

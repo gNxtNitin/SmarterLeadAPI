@@ -5,6 +5,13 @@
         public int PaymentID { get; set; }
         public int ClientID { get; set; }
         public int PlanID { get; set; }
+        public string CompanyName { get; set; }
+        public string CompanyEmail { get; set; }
+        public string CompanyPhone { get; set; }
+        public string CompanyAddress { get; set; }
+        public string CompanyCity { get; set; }
+        public string CompanyState { get; set; }
+        public string CompanyZip { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string EmailID { get; set; }
