@@ -13,10 +13,12 @@ namespace SmarterLead.API.Models.RequestModel
         public string? role { get; set; }
         public List<string>? Classifications { get; set; }
         public List<string>? CargoCarried { get; set; }
+        public List<string>? InsuranceCarrier { get; set; }
         public string? statetext { get; set; }
         public string? cargocarriedtext { get; set; }
         public string? classificationtext { get; set; }
         public string? entitytypetext { get; set; }
+        public string? insurancecarriertext { get; set; }
         public string? PowerUnitSt {get;set;}
         public string? PowerUnitEnd {get;set;}
         public string? DriverSt {get;set;}
@@ -29,5 +31,9 @@ namespace SmarterLead.API.Models.RequestModel
         public string? HazmatEnd {get;set;}
         public string? OOsSt {get;set;}
         public string? OOsEnd { get;set;}
+        public string? CoverageSt { get; set; }
+        public string? CoverageEnd { get; set; }
+        public string? ExpirySt { get; set; }
+        public string? ExpiryEnd { get; set; }
     }
 }

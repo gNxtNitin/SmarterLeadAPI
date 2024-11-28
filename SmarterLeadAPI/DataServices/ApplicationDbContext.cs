@@ -654,7 +654,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_clientLoginID", clientLoginId, DbType.String);
                         var response = await connection.QueryAsync(
                             //"pGetDashboardLeadStats",
-                            "potest",
+                            "pGetColumn",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
@@ -720,6 +720,7 @@ namespace SmarterLead.API.DataServices
         public async Task<string> GetSearchLeadStats(SearchLeadRequest r)
         {
             string resp = "";
+            
             try
             {
                 using (var connection = new MySqlConnection(Database.GetConnectionString()))
@@ -731,10 +732,10 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_userLimit", r.UserLimit, DbType.Int32);
                         parameters.Add("_stateCode", r.statetext, DbType.String);
                         parameters.Add("_entityType", r.entitytypetext, DbType.String);
-                        parameters.Add("_role", r.role, DbType.Int32);
+                        parameters.Add("_role", decimal.Parse(r.role), DbType.Decimal);
                         parameters.Add("_cargoCarriedName", r.cargocarriedtext, DbType.String);
                         parameters.Add("_operation", r.classificationtext, DbType.String);
-                        //parameters.Add("_carcarried", r.CargoCarried, DbType.String);
+                        parameters.Add("_insurancecarrier", r.insurancecarriertext, DbType.String);
                         parameters.Add("_fromPU", r.PowerUnitSt, DbType.Int32);
                         parameters.Add("_toPU", r.PowerUnitEnd, DbType.Int32);
                         parameters.Add("_fromTD", r.DriverSt, DbType.Int32);
@@ -747,6 +748,10 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_toHI", r.HazmatEnd, DbType.Int32);
                         parameters.Add("_fromOV", r.OOsSt, DbType.Int32);
                         parameters.Add("_toOV", r.OOsEnd, DbType.Int32);
+                        parameters.Add("_fromCR", r.CoverageSt, DbType.Int32);
+                        parameters.Add("_toCR", r.CoverageEnd, DbType.Int32);
+                        parameters.Add("_fromED", r.ExpirySt, DbType.Int32);
+                        parameters.Add("_toED", r.ExpiryEnd, DbType.Int32);
 
                         var response = await connection.QueryAsync(
                             "pGetSearchedLeads",
@@ -802,8 +807,9 @@ namespace SmarterLead.API.DataServices
 
 
                             var resultSet5 = multi.Read<dynamic>().ToList();
+                            var resultSet6 = multi.Read<dynamic>().ToList();
 
-                            data = [resultSet1, resultSet2, resultSet3, resultSet4, resultSet5];
+                            data = [resultSet1, resultSet2, resultSet3, resultSet4, resultSet5, resultSet6];
 
 
                         }
@@ -946,6 +952,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_clientDwdLeadSummaryID", _clientDwdLeadSummaryID, DbType.String);
                         var response = await connection.QueryAsync(
                             "pGetClientdwdLeadDetail",
+                            //"pGetClientdwdLeadDetail111",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
