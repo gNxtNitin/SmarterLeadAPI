@@ -96,8 +96,8 @@ namespace SmarterLead.API.Controllers
         [HttpPost("LoginOtp")]
         public async Task<IActionResult> LoginOtp([FromBody] UserLoginRequest model)
         {
-            //model.otp = GenerateRandomOTP();
-            model.otp = "000000";
+            model.otp = GenerateRandomOTP();
+            //model.otp = "000000";
             var resp = await _context.LoginOtp(model);
             var p = resp.Count();
             if (p > 40)

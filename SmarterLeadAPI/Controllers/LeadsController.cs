@@ -5,6 +5,7 @@ using SmarterLead.API.DataServices;
 using SmarterLead.API.Helper;
 using SmarterLead.API.Models.RequestModel;
 using SmarterLead.API.Models.ResponseModel;
+using System.Text;
 using System.Text.Json;
 
 namespace SmarterLead.API.Controllers
@@ -13,12 +14,14 @@ namespace SmarterLead.API.Controllers
     [ApiController]
     public class LeadsController : ControllerBase
     {
+       
         private IConfiguration _config;
         private readonly ApplicationDbContext _context;
         private readonly JsonSerializerOptions _serializerOptions;
         public CPAService _service;
         public LeadsController(IConfiguration config, ApplicationDbContext context)
         {
+            
             _config = config;
             _context = context;
             _serializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -174,7 +177,26 @@ namespace SmarterLead.API.Controllers
             }
             return Unauthorized();
         }
-        
+
+        [HttpPost("anymer")]
+        //[Authorize]
+        public async Task<IActionResult> Anymer([FromBody] object r)
+        {
+
+            var leadsCount = r;
+            
+            var body = System.Text.Json.JsonSerializer.Serialize(r, _serializerOptions);
+            var content = new StringContent(body, Encoding.UTF8, "application/json");
+            var client = new HttpClient();
+            var result = client.PostAsync("https://prod-15.centralindia.logic.azure.com:443/workflows/0f59d427e3f44f83a3701b4f9b9b7f94/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ty6Z_AaEcWXPVQ4sFYtEeVli5ycGUuiVP30TFQ0zoEc", content);
+
+            if (leadsCount != null)
+            {
+                return Ok(leadsCount);
+            }
+            return Unauthorized();
+        }
+
 
     }
 }
