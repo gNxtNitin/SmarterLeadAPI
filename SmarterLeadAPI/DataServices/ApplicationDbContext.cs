@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 //using MySql.Data.MySqlClient;
 using MySqlConnector;
 using Newtonsoft.Json;
+using SmarterLead.API.AgencyLeadsManager.Entities;
+using SmarterLead.API.AgencyLeadsManager;
 using SmarterLead.API.Models.RequestModel;
 using SmarterLead.API.Models.ResponseModel;
 using Sprache;
@@ -1348,41 +1350,288 @@ namespace SmarterLead.API.DataServices
 
         }
 
-        public async Task<string> ZohoData(string id, string message)
+        //public async Task<string> ZohoData(string id, string message)
+        //{
+
+        //    string resp = "";
+        //    try
+        //    {
+        //        using (var connection = new MySqlConnection(Database.GetConnectionString()))
+        //        {
+        //            try
+        //            {
+        //                var parameters = new DynamicParameters();
+
+        //                parameters.Add("_id", id, DbType.String);
+        //                parameters.Add("_message", message, DbType.String);
+
+
+        //                var response = await connection.ExecuteAsync(
+        //                    //"pCreatePassword",
+        //                    "polo",
+        //                    parameters,
+        //                    commandType: CommandType.StoredProcedure);
+        //                resp = JsonConvert.SerializeObject(response);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //    }
+        //    return resp;
+
+        //}
+
+        //Agency related Store procedures
+        public async Task<IEnumerable<int>> GetActiveAgencyIds()
         {
 
-            string resp = "";
-            try
+            using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
             {
-                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                IEnumerable<int> activeAgencyIds = Enumerable.Empty<int>();
+                try
                 {
-                    try
+
+                    activeAgencyIds = await connection.QueryAsync<int>("pGetActiveAgencyIds", commandType: CommandType.StoredProcedure);
+                }
+                catch (Exception ex)
+                {
+                    //log exception
+                }
+
+                return activeAgencyIds;
+            }
+        }
+
+        public async Task<IEnumerable<AgencyDailyLeadEntity>> GetDailyLeadForAgency(int agencyId, DateTime allocatedDate)
+        {
+            IEnumerable<AgencyDailyLeadEntity> agencyDailyLeads = Enumerable.Empty<AgencyDailyLeadEntity>();
+
+            using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
+            {
+                try
+                {
+                    var parameters = new DynamicParameters();
+                    parameters.Add("_clientid", agencyId, DbType.Int32);
+                    parameters.Add("_date", allocatedDate, DbType.Date);
+
+                    agencyDailyLeads = await connection.QueryAsync<AgencyDailyLeadEntity>("pGetDailyAgencyLeads", parameters, commandType: CommandType.StoredProcedure);
+                }
+                catch (Exception ex)
+                {
+                    //log exception
+                }
+
+                return agencyDailyLeads;
+            }
+        }
+
+
+        //public async void UpdateDNDStatus(int agencyId, bool DNDStatus)
+        //{
+        //    using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
+        //    {
+        //        var parameters = new DynamicParameters();
+        //        parameters.Add("_clientid", agencyId, DbType.Int32);
+        //        parameters.Add("_dndStatus", DNDStatus, DbType.Binary);
+
+        //        await connection.ExecuteAsync("pGetActiveAgencyIds", parameters, commandType: CommandType.StoredProcedure);
+
+
+        //    }
+        //}
+
+        public async void UpdateAgencyLeadStatus(string ZohoLeadId, string status)
+        {
+            using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
+            {
+                try
+                {
+                    var parameters = new DynamicParameters();
+                    parameters.Add("_zohoLeadId", ZohoLeadId, DbType.String);
+                    parameters.Add("_leadStatus", status, DbType.String);
+                    await connection.ExecuteAsync("pUpdateAgencyLeadStatus", commandType: CommandType.StoredProcedure);
+                }
+                catch (Exception ex)
+                {
+                    //log exception
+                }
+
+            }
+        }
+
+        public async Task<AgencyZohoSecret> GetAgencySecret(dynamic spParam, bool fromAgencyId)
+        {
+            AgencyZohoSecret secret = null;
+
+            using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
+            {
+                try
+                {
+                    if (fromAgencyId)
                     {
                         var parameters = new DynamicParameters();
-
-                        parameters.Add("_id", id, DbType.String);
-                        parameters.Add("_message", message, DbType.String);
-
-
-                        var response = await connection.ExecuteAsync(
-                            //"pCreatePassword",
-                            "polo",
-                            parameters,
-                            commandType: CommandType.StoredProcedure);
-                        resp = JsonConvert.SerializeObject(response);
+                        parameters.Add("_clientId", spParam, DbType.String);
+                        parameters.Add("_zohoUId", DBNull.Value, DbType.String);
+                        secret = await connection.QueryFirstOrDefaultAsync<AgencyZohoSecret>("pGetAgencySecrets", parameters, commandType: CommandType.StoredProcedure);
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientId", DBNull.Value, DbType.String);
+                        parameters.Add("_zohoUId", spParam, DbType.String);
+                        secret = await connection.QueryFirstOrDefaultAsync<AgencyZohoSecret>("pGetAgencySecrets", parameters, commandType: CommandType.StoredProcedure);
+
                     }
                 }
-            }
-            catch (Exception ex)
-            {
+
+                catch (Exception ex)
+                {
+                    //log exceptions
+                }
 
             }
-            return resp;
 
+            return secret;
         }
+
+        public async Task<int> AddZohoLeadId(int agencyId, int leadId, string zohoLeadId)
+        {
+            int rowAffected = 0;
+            using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
+            {
+                try
+                {
+                    var parameters = new DynamicParameters();
+                    parameters.Add("_clientId", agencyId, DbType.Int32);
+                    parameters.Add("_leadId", leadId, DbType.Int32);
+                    parameters.Add("_zohoLeadId", zohoLeadId, DbType.String);
+
+                    rowAffected = await connection.ExecuteAsync("pUpdateZohoLeadId", parameters, commandType: CommandType.StoredProcedure);
+                }
+                catch (Exception ex)
+                {
+                    //log exception
+                }
+
+            }
+            return rowAffected;
+        }
+
+        public async Task<bool> UpdateAgencyLeadStatus(string zohoLeadId, string callStatus, string leadStatus)
+        {
+            bool isRowAffected = false;
+
+            using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
+            {
+                try
+                {
+                    var parameters = new DynamicParameters();
+                    parameters.Add("_zohoLeadId", zohoLeadId, DbType.String);
+                    parameters.Add("_callStatus", callStatus, DbType.String);
+                    parameters.Add("_leadStatus", leadStatus, DbType.String);
+
+                    isRowAffected = await connection.ExecuteAsync("pSyncAgencyLeadStatus", parameters, commandType: CommandType.StoredProcedure) > 0;
+                }
+                catch (Exception ex)
+                {
+                    //log exception
+                }
+
+            }
+
+            return isRowAffected;
+        }
+
+        public async Task<PromptText> GetPromptText(int promptId)
+        {
+
+            using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
+            {
+                PromptText promptText = null;
+
+                try
+                {
+                    var parameters = new DynamicParameters();
+                    parameters.Add("promptId", promptId, DbType.Int32);
+                    promptText = await connection.QueryFirstAsync<PromptText>("pGetPrompt", parameters, commandType: CommandType.StoredProcedure);
+                }
+                catch (Exception ex)
+                {
+                    //log exception
+                }
+
+                return promptText;
+            }
+        }
+
+        public async Task<int> AddCallData(string zohoLeadId, CallDetail calldetail, QuickQuoteRoot quickQuoteDetail = null)
+        {
+            int rowAffected = 0;
+            using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
+            {
+                try
+                {
+                    string callDataInsertQuery = "INSERT INTO calldetail(CallSummary, CallStatus) VALUES (@CallSummary, @CallStatus); SELECT LAST_INSERT_ID();";
+
+                    int callDetailId = await connection.ExecuteScalarAsync<int>(callDataInsertQuery, calldetail);
+
+
+
+                    if (callDetailId > 0 && quickQuoteDetail != null)
+                    {
+                        quickQuoteDetail.QuickQuoteDetails.CallId = callDetailId;
+
+                        string getIdQuery = "SELECT AgencyAssociateLeadID FROM agencyassociatelead WHERE ZohoLeadID = @ZohoLeadId";
+                        int agencyassociateLeadId = await connection.ExecuteScalarAsync<int>(getIdQuery, new { ZohoLeadId = zohoLeadId });
+
+                        if (agencyassociateLeadId > 0)
+                        {
+                            quickQuoteDetail.QuickQuoteDetails.AgencyAssociateLeadId = agencyassociateLeadId;
+
+                            string quickQuoteInsertQuery = "INSERT INTO quickquotedetail (CallId, AgencyAssociateLeadId, OwnerName, EIN, BusinessName, BusinessYears, BusinessType, Violations, CargoTypes) VALUES (@CallId, @AgencyAssociateLeadId, @OwnerName, @EIN, @BusinessName, @BusinessYears, @BusinessType, @Violations, @CargoTypes); SELECT LAST_INSERT_ID();";
+
+                            int quickQuoteRecordId = await connection.ExecuteScalarAsync<int>(quickQuoteInsertQuery, quickQuoteDetail.QuickQuoteDetails);
+
+                            if (quickQuoteRecordId > 0 && quickQuoteDetail.Vehicles != null && quickQuoteDetail.Vehicles.Count > 0)
+                            {
+                                string quickQuoteVehicleInsertQuery = "INSERT INTO quickquotevehicledetail(QuickQuoteDetailId, VIN, Make_Model, Value, SafetyFeature, GaragingAddress, GVW) VALUES (@QuickQuoteDetailId, @VIN, @MakeModel, @Value, @SafetyFeatures, @GaragingAddress, @GVW)";
+
+                                foreach (var vehicle in quickQuoteDetail.Vehicles)
+                                {
+                                    vehicle.QuickQuoteDetailId = quickQuoteRecordId;
+                                    await connection.ExecuteAsync(quickQuoteVehicleInsertQuery, vehicle);
+                                }
+                            }
+
+                            if (quickQuoteRecordId > 0 && quickQuoteDetail.Drivers != null && quickQuoteDetail.Drivers.Count > 0)
+                            {
+                                string quickQuoteDriverInsertQuery = "INSERT INTO quickquotedriverdetaiL(QuickQuoteDetailId, DriverName, LicenseNumber, CDLDuration, LicenseState) VALUES (@QuickQuoteDetailId, @DriverName, @LicenseNumber, @CDLDuration, @LicenseState)";
+
+                                foreach (var driver in quickQuoteDetail.Drivers)
+                                {
+                                    driver.QuickQuoteDetailId = quickQuoteRecordId;
+                                    await connection.ExecuteAsync(quickQuoteDriverInsertQuery, driver);
+                                }
+                            }
+                        }
+                    }
+
+                    await UpdateAgencyLeadStatus(zohoLeadId, calldetail.CallStatus, string.Empty);
+                }
+                catch (Exception ex)
+                {
+                    //log exception
+                }
+
+            }
+            return rowAffected;
+        }
+
     }
 }

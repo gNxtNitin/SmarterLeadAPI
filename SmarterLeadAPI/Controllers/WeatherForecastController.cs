@@ -23,19 +23,19 @@ namespace SmarterLeadAPI.Controllers
             
         }
 
-        [HttpGet("zohodata")]
-        //[Authorize]
-        public async Task<IActionResult> Zohodata()
-        {
+        //[HttpGet("zohodata")]
+        ////[Authorize]
+        //public async Task<IActionResult> Zohodata()
+        //{
 
-            var leadsCount = await _context.ZohoData("er", "this");
+        //    var leadsCount = await _context.ZohoData("er", "this");
 
-            if (leadsCount != null)
-            {
-                return Ok(leadsCount);
-            }
-            return BadRequest("Invalid request.");
-        }
+        //    if (leadsCount != null)
+        //    {
+        //        return Ok(leadsCount);
+        //    }
+        //    return BadRequest("Invalid request.");
+        //}
 
 
     }
