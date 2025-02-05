@@ -738,6 +738,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_cargoCarriedName", r.cargocarriedtext, DbType.String);
                         parameters.Add("_operation", r.classificationtext, DbType.String);
                         parameters.Add("_insurancecarrier", r.insurancecarriertext, DbType.String);
+                        parameters.Add("_radiusOfOperation", r.radiusofoperationtext, DbType.String);
                         parameters.Add("_fromPU", r.PowerUnitSt, DbType.Int32);
                         parameters.Add("_toPU", r.PowerUnitEnd, DbType.Int32);
                         parameters.Add("_fromTD", r.DriverSt, DbType.Int32);
@@ -754,9 +755,77 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_toCR", r.CoverageEnd, DbType.Int32);
                         parameters.Add("_fromED", r.ExpirySt, DbType.Int32);
                         parameters.Add("_toED", r.ExpiryEnd, DbType.Int32);
+                        parameters.Add("_fromMVR", r.MVRSt, DbType.Int32);
+                        parameters.Add("_toMVR", r.MVREnd, DbType.Int32);
 
                         var response = await connection.QueryAsync(
                             "pGetSearchedLeads",
+                            //"pNewTest1",
+                            //"pppp3",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (resp == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<string> SaveSearchFilters(SearchLeadRequest r)
+        {
+            string resp = "";
+
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientLoginID", r.ClientLoginID, DbType.Int32);
+                        parameters.Add("_stateCode", r.statetext, DbType.String);
+                        parameters.Add("_entityType", r.entitytypetext, DbType.String);
+                        parameters.Add("_role", decimal.Parse(r.role), DbType.Decimal);
+                        parameters.Add("_cargoCarriedName", r.cargocarriedtext, DbType.String);
+                        parameters.Add("_operation", r.classificationtext, DbType.String);
+                        parameters.Add("_insurancecarrier", r.insurancecarriertext, DbType.String);
+                        parameters.Add("_radiusOfOperation", r.radiusofoperationtext, DbType.String);
+                        parameters.Add("_fromPU", r.PowerUnitSt, DbType.Int32);
+                        parameters.Add("_toPU", r.PowerUnitEnd, DbType.Int32);
+                        parameters.Add("_fromTD", r.DriverSt, DbType.Int32);
+                        parameters.Add("_toTD", r.DriverEnd, DbType.Int32);
+                        parameters.Add("_fromVI", r.VehicleInsSt, DbType.Int32);
+                        parameters.Add("_toVI", r.VehicleInsEnd, DbType.Int32);
+                        parameters.Add("_fromDI", r.DriveInsSt, DbType.Int32);
+                        parameters.Add("_toDI", r.DriveInsEnd, DbType.Int32);
+                        parameters.Add("_fromHI", r.HazmatSt, DbType.Int32);
+                        parameters.Add("_toHI", r.HazmatEnd, DbType.Int32);
+                        parameters.Add("_fromOV", r.OOsSt, DbType.Int32);
+                        parameters.Add("_toOV", r.OOsEnd, DbType.Int32);
+                        parameters.Add("_fromCR", r.CoverageSt, DbType.Int32);
+                        parameters.Add("_toCR", r.CoverageEnd, DbType.Int32);
+                        parameters.Add("_fromED", r.ExpirySt, DbType.Int32);
+                        parameters.Add("_toED", r.ExpiryEnd, DbType.Int32);
+                        parameters.Add("_fromMVR", r.MVRSt, DbType.Int32);
+                        parameters.Add("_toMVR", r.MVREnd, DbType.Int32);
+
+                        var response = await connection.ExecuteAsync(
+                            "pSaveFilterPreference",
                             //"pNewTest1",
                             //"pppp3",
                             parameters,
@@ -810,8 +879,10 @@ namespace SmarterLead.API.DataServices
 
                             var resultSet5 = multi.Read<dynamic>().ToList();
                             var resultSet6 = multi.Read<dynamic>().ToList();
+                            var resultSet7 = multi.Read<dynamic>().ToList();
 
-                            data = [resultSet1, resultSet2, resultSet3, resultSet4, resultSet5, resultSet6];
+
+                            data = [resultSet1, resultSet2, resultSet3, resultSet4, resultSet5, resultSet6, resultSet7];
 
 
                         }
@@ -895,6 +966,66 @@ namespace SmarterLead.API.DataServices
                         var response = await connection.QueryAsync(
                             "pDownloadLeads",
                             //"pNewTest2",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<string> GetSavedFilters(int clientLoginId)
+        {
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientLoginId", clientLoginId, DbType.String);
+                        
+                        var response = await connection.QueryFirstOrDefaultAsync(
+                            "pGetSavedFilters",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<string> GetSearchedData(int summaryId)
+        {
+            string resp = "";
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_clientDwdLeadSummaryID", summaryId, DbType.String);
+
+                        var response = await connection.QueryFirstOrDefaultAsync(
+                            "pGetSearchedData",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);

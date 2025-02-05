@@ -14,11 +14,13 @@ namespace SmarterLead.API.Models.RequestModel
         public List<string>? Classifications { get; set; }
         public List<string>? CargoCarried { get; set; }
         public List<string>? InsuranceCarrier { get; set; }
+        public List<string>? RadiusOfOperation { get; set; }
         public string? statetext { get; set; }
         public string? cargocarriedtext { get; set; }
         public string? classificationtext { get; set; }
         public string? entitytypetext { get; set; }
         public string? insurancecarriertext { get; set; }
+        public string? radiusofoperationtext { get; set; }
         public string? PowerUnitSt {get;set;}
         public string? PowerUnitEnd {get;set;}
         public string? DriverSt {get;set;}
@@ -35,5 +37,7 @@ namespace SmarterLead.API.Models.RequestModel
         public string? CoverageEnd { get; set; }
         public string? ExpirySt { get; set; }
         public string? ExpiryEnd { get; set; }
+        public string? MVRSt { get; set; }
+        public string? MVREnd { get; set; }
     }
 }

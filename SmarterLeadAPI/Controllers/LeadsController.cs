@@ -5,8 +5,10 @@ using SmarterLead.API.DataServices;
 using SmarterLead.API.Helper;
 using SmarterLead.API.Models.RequestModel;
 using SmarterLead.API.Models.ResponseModel;
+using Sprache;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 
 namespace SmarterLead.API.Controllers
 {
@@ -60,6 +62,43 @@ namespace SmarterLead.API.Controllers
             }
             return Unauthorized();
         }
+        [HttpGet("GetSavedFilters")]
+        [Authorize]
+        public async Task<IActionResult> GetSavedFilters(int clientLoginId)
+        {
+            var result = await _context.GetSavedFilters(clientLoginId);
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return Unauthorized();
+        }
+        [HttpGet("GetSearchedData")]
+        [Authorize]
+        public async Task<IActionResult> GetSearchedData(string summaryId)
+        {
+            //summaryId = Uri.UnescapeDataString(summaryId);
+            //summaryId = HttpUtility.UrlDecode(summaryId);
+            summaryId = _service.DecryptString(summaryId);
+            var result = await _context.GetSearchedData(int.Parse(summaryId));
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return Unauthorized();
+        }
+        [HttpPost("SaveSearchFilters")]
+        [Authorize]
+        public async Task<IActionResult> SaveSearchFilters([FromBody] SearchLeadRequest slr)
+        {
+            var result = await _context.SaveSearchFilters(slr);
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return Unauthorized();
+        }
+
         [HttpPost("GetSearchLeads")]
         [Authorize]
         public async Task<IActionResult> GetSearchLeads([FromBody] SearchLeadRequest r)
@@ -166,7 +205,7 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpGet("GetPlans")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetPlans()
         {
             //var userDetails = await _context.clientplan.FindAsync(id);
