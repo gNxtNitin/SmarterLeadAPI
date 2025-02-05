@@ -81,6 +81,7 @@ namespace SmarterLead.API.Controllers
             //summaryId = HttpUtility.UrlDecode(summaryId);
             summaryId = _service.DecryptString(summaryId);
             var result = await _context.GetSearchedData(int.Parse(summaryId));
+            //return Ok(result);
             if (result != null)
             {
                 return Ok(result);
