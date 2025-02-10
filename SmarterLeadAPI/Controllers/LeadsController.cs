@@ -64,9 +64,9 @@ namespace SmarterLead.API.Controllers
         }
         [HttpGet("GetSavedFilters")]
         [Authorize]
-        public async Task<IActionResult> GetSavedFilters(int clientLoginId)
+        public async Task<IActionResult> GetSavedFilters(int clientLoginId, string role)
         {
-            var result = await _context.GetSavedFilters(clientLoginId);
+            var result = await _context.GetSavedFilters(clientLoginId, role);
             if (result != null)
             {
                 return Ok(result);
@@ -206,7 +206,7 @@ namespace SmarterLead.API.Controllers
         }
 
         [HttpGet("GetPlans")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetPlans()
         {
             //var userDetails = await _context.clientplan.FindAsync(id);

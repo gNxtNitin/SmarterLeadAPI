@@ -825,7 +825,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_toMVR", r.MVREnd, DbType.Int32);
 
                         var response = await connection.ExecuteAsync(
-                            "pSaveFilterPreference",
+                            "pSaveFilterPreference2",
                             //"pNewTest1",
                             //"pppp3",
                             parameters,
@@ -982,7 +982,7 @@ namespace SmarterLead.API.DataServices
             }
             return resp;
         }
-        public async Task<string> GetSavedFilters(int clientLoginId)
+        public async Task<string> GetSavedFilters(int clientLoginId, string role)
         {
             string resp = "";
             try
@@ -993,9 +993,10 @@ namespace SmarterLead.API.DataServices
                     {
                         var parameters = new DynamicParameters();
                         parameters.Add("_clientLoginId", clientLoginId, DbType.String);
+                        parameters.Add("_roleE", role, DbType.String);
                         
                         var response = await connection.QueryFirstOrDefaultAsync(
-                            "pGetSavedFilters",
+                            "pGetSavedFilters2",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
