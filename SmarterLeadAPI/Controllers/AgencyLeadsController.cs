@@ -20,7 +20,7 @@ namespace SmarterLead.API.Controllers
 
 
         [HttpGet("UpldLeadOnZoho")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> UploadLeadOnZoho()
         {
             try

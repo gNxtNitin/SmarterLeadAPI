@@ -189,6 +189,35 @@ namespace SmarterLead.API.Controllers
             }
             return Unauthorized();
         }
+        [HttpGet("SearchDOT")]
+        //[Authorize]
+        public async Task<IActionResult> SearchDOT(string eir)
+        {
+            //var d = await _service.Decrypt(eir);
+            var data = await _context.GetSearchDOT(int.Parse(eir));
+            if (data.Count() == 2)
+            {
+                return Ok("");
+            }
+
+            if (data.Count() > 2)
+            {
+                return Ok(data);
+            }
+            return Unauthorized();
+        }
+        [HttpGet("GetDOTData")]
+        //[Authorize]
+        public async Task<IActionResult> GetDOTData(string eir, string csr)
+        {
+            //var d = await _service.Decrypt(eir);
+            var data = await _context.GetDOTData(eir, int.Parse(csr));
+            if (data.Count() != 0)
+            {
+                return Ok(data);
+            }
+            return Unauthorized();
+        }
 
         [HttpGet("GetCurrentPlan")]
         [Authorize]

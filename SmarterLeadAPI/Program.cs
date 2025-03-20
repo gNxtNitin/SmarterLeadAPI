@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using SmarterLead.API.AgencyLeadsManager;
 using SmarterLead.API.DataServices;
 using SmarterLead.API.Models;
 
@@ -63,6 +64,10 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Host.UseSerilog();
+
+builder.Services.AddHttpClient<IAgencyLeadsService, AgencyLeadsService>();
+builder.Services.AddScoped<IAgencyLeadsService, AgencyLeadsService>();
+
 
 var app = builder.Build();
 

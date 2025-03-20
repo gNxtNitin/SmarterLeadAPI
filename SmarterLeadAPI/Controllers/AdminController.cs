@@ -369,6 +369,15 @@ namespace SmarterLead.API.Controllers
 
 
         }
+        [HttpGet("SchedulePlanUpdate")]
+        //[Authorize]
+        public async Task<IActionResult> SchedulePlanUpdate()
+        {
+            //var userDetails = await _context.clientplan.FindAsync(id);
+            var response = await _context.SchedulePlanUpdate();
+            return Ok(response);
+            
+        }
 
     }
 }

@@ -69,6 +69,7 @@ public class PaymentsController : Controller
         
         tkn1 = HttpUtility.UrlEncode(tkn1);
         //tkn1 = Uri.UnescapeDataString(tkn1);
+        var productincents = (Math.Round(decimal.Parse(pr.ProductPrice), 2) * 100);
         var options = new SessionCreateOptions
         {
 
@@ -85,7 +86,7 @@ public class PaymentsController : Controller
                         Name = pr.ProductName,
                         Description = pr.ProductDescription,
                     },
-                    UnitAmount = int.Parse(pr.ProductPrice) * 100, // Amount in cents
+                    UnitAmount = (int) productincents, // Amount in cents
                 },
                 Quantity = 1,
             },
@@ -126,6 +127,7 @@ public class PaymentsController : Controller
         if (pr.IsCoupon != false) // Check if the coupon is valid
         {
             // If it's a percentage discount
+            
             if (pr.DiscountType == "P")
             {
                 var percentageOff = float.Parse(pr.DiscountValue) / 100.0; // Assume the DiscountValue is 20 for 20% off
@@ -138,13 +140,14 @@ public class PaymentsController : Controller
                 //    Coupon = "manual_coupon_" + pr.CouponCode, // This can be a unique identifier for tracking
                 //}
                 // };
-
-                options.LineItems[0].PriceData.UnitAmount = (int)(int.Parse(pr.ProductPrice) - discountAmount) * 100;
+                var discountInCents = discountAmount * 100;
+                var totalDiscount = (int)productincents - (int) discountInCents;
+                options.LineItems[0].PriceData.UnitAmount = totalDiscount;
             }
             // If it's a fixed amount discount
             else
             {
-                var discountAmount = int.Parse(pr.DiscountValue) * 100; // Convert to cents (e.g., $10 off becomes 1000)
+                var discountAmount =(int) Math.Round(float.Parse(pr.DiscountValue), 2) * 100; // Convert to cents (e.g., $10 off becomes 1000)
                                                                         //options.Discounts = new List<SessionDiscountOptions>
                                                                         //{
                                                                         //    new SessionDiscountOptions
@@ -154,7 +157,7 @@ public class PaymentsController : Controller
                                                                         //    }
                                                                         //};
 
-                options.LineItems[0].PriceData.UnitAmount = (int.Parse(pr.ProductPrice) - discountAmount) * 100;
+                options.LineItems[0].PriceData.UnitAmount = (int) productincents - discountAmount;
             }
         }
 

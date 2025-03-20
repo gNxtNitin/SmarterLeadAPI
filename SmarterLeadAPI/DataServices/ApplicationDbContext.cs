@@ -719,6 +719,169 @@ namespace SmarterLead.API.DataServices
             }
             return resp;
         }
+        public async Task<string> GetSearchDOT(int DOT)
+        {
+            string resp = "";
+            DataTable dt = new DataTable();
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("_dot", DOT, DbType.Int32);
+                        var response = await connection.QueryAsync(
+                            "pSearchDOT",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                        resp = JsonConvert.SerializeObject(response);
+                        //if (resp == null)
+                        //{
+                        //    _logger.LogWarning("User with UserId: {UserId} not found", user.UserName);
+                        //}
+                        //else
+                        //{
+                        //    _logger.LogInformation("User with UserId: {UserId} found", user.UserName);
+                        //}
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return resp;
+        }
+        public async Task<List<List<dynamic>>> GetDOTData(string dot, int cursor)
+        {
+            string resp = "";
+            List<List<dynamic>> data = new List<List<dynamic>>();
+            try
+            {
+                using (var connection = new MySqlConnection(Database.GetConnectionString()))
+                {
+                    try
+                    {
+                        if (cursor == 2)
+                        {
+                            var parameters = new DynamicParameters();
+                            parameters.Add("IN_DotNumber", int.Parse(dot), DbType.Int32);
+                            using (var multi = await connection.QueryMultipleAsync("sp_GetInspectionRecords", parameters, commandType: CommandType.StoredProcedure))
+                            {
+                                var resultSet1 = multi.Read<dynamic>().ToList();
+                                //data.Add(resultSet1);
+
+                                var resultSet2 = multi.Read<dynamic>().ToList();
+                                //data.Add(resultSet2);
+
+
+
+
+                                data = [resultSet1, resultSet2];
+
+
+                            }
+                        }
+                        else if(cursor == 3)
+                        {
+                            var parameters = new DynamicParameters();
+                            parameters.Add("p_DotNumber", int.Parse(dot), DbType.Int32);
+                            using (var multi = await connection.QueryMultipleAsync("sp_GetAccidentReport", parameters, commandType: CommandType.StoredProcedure))
+                            {
+                                var resultSet1 = multi.Read<dynamic>().ToList();
+                                //data.Add(resultSet1);
+
+                                var resultSet2 = multi.Read<dynamic>().ToList();
+                                //data.Add(resultSet2);
+
+                                var resultSet3 = multi.Read<dynamic>().ToList();
+
+
+
+                                data = [resultSet1, resultSet2, resultSet3];
+
+
+                            }
+                        }
+                        else if (cursor == 1)
+                        {
+                            var parameters = new DynamicParameters();
+                            parameters.Add("p_DotDocketID", int.Parse(dot), DbType.Int32);
+                            using (var multi = await connection.QueryMultipleAsync("SP_GetCarrierInsuranceDetails", parameters, commandType: CommandType.StoredProcedure))
+                            {
+                                var resultSet1 = multi.Read<dynamic>().ToList();
+                                //data.Add(resultSet1);
+
+                                var resultSet2 = multi.Read<dynamic>().ToList();
+                                //data.Add(resultSet2);
+
+
+
+
+                                data = [resultSet1, resultSet2];
+
+
+                            }
+                        }
+                        else if (cursor == 4)
+                        {
+                            var parameters = new DynamicParameters();
+                            parameters.Add("p_VIN", dot, DbType.String);
+                            using (var multi = await connection.QueryMultipleAsync("sp_GetVehicleInfo", parameters, commandType: CommandType.StoredProcedure))
+                            {
+                                var resultSet1 = multi.Read<dynamic>().ToList();
+                                //data.Add(resultSet1);
+
+                                //var resultSet2 = multi.Read<dynamic>().ToList();
+                                //data.Add(resultSet2);
+
+
+
+
+                                data = [resultSet1];
+
+
+                            }
+                        }
+                        //var response = await connection.QueryAsync(
+                        //    "pGetOperatingStatus",
+                        //    commandType: CommandType.StoredProcedure);
+                        //resp = JsonConvert.SerializeObject(response);
+                        //data.Add(resp);
+                        //response = await connection.QueryAsync(
+                        //    "pGetEntityType",
+                        //    commandType: CommandType.StoredProcedure);
+                        //string resp1 = JsonConvert.SerializeObject(response);
+                        ////data.Add(resp1);
+                        //response = await connection.QueryAsync(
+                        //    "pGetStateCode",
+                        //    commandType: CommandType.StoredProcedure);
+                        //string resp2 = JsonConvert.SerializeObject(response);
+                        ////data.Add(resp2);
+                        //response = await connection.QueryAsync(
+                        //    "pGetCargoCarried",
+                        //    commandType: CommandType.StoredProcedure);
+                        //string resp3 = JsonConvert.SerializeObject(response);
+                        ////data.Add(resp3);
+                        //data = [resp, resp1, resp2, resp3];
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex, "An error occurred while calling stored procedure GetUserById with UserId: {UserId}", user.UserName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return data;
+        }
         public async Task<string> GetSearchLeadStats(SearchLeadRequest r)
         {
             string resp = "";
@@ -825,7 +988,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_toMVR", r.MVREnd, DbType.Int32);
 
                         var response = await connection.ExecuteAsync(
-                            "pSaveFilterPreference2",
+                            "pSaveFilterPreference",
                             //"pNewTest1",
                             //"pppp3",
                             parameters,
@@ -996,7 +1159,7 @@ namespace SmarterLead.API.DataServices
                         parameters.Add("_roleE", role, DbType.String);
                         
                         var response = await connection.QueryFirstOrDefaultAsync(
-                            "pGetSavedFilters2",
+                            "pGetSavedFilters",
                             parameters,
                             commandType: CommandType.StoredProcedure);
                         resp = JsonConvert.SerializeObject(response);
@@ -1765,5 +1928,25 @@ namespace SmarterLead.API.DataServices
             return rowAffected;
         }
 
+
+        public async Task<string> SchedulePlanUpdate()
+        {
+            using (MySqlConnection connection = new MySqlConnection(Database.GetConnectionString()))
+            {
+                try
+                {
+                    
+                    
+                    var response = await connection.ExecuteAsync("pScheduledProcedure", commandType: CommandType.StoredProcedure);
+                    
+                }
+                catch (Exception ex)
+                {
+                    //log exception
+                }
+
+            }
+            return "Success!";
+        }
     }
 }
